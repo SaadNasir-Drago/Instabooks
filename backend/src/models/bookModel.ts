@@ -15,14 +15,14 @@ export const getBookById = async (id: number): Promise<Book[] | null> => {
 export const createBook = async (book: Book): Promise<void> => {
   await query(
     'INSERT INTO books (title, author, published_date, genre) VALUES ($1, $2, $3, $4)',
-    [book.title, book.author, book.published_date, book.genre]
+    // [book.title, book.author, book.publishDate, book.genre]
   );
 };
 
 export const updateBook = async (id: number, book: Book): Promise<void> => {
   await query(
     'UPDATE books SET title = $1, author = $2, published_date = $3, genre = $4 WHERE id = $5',
-    [book.title, book.author, book.published_date, book.genre, id]
+    // [book.title, book.author, book.publishDate, book.genre, id]
   );
 };
 
