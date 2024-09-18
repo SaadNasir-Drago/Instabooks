@@ -1,4 +1,6 @@
 import { Pool } from "pg";
+import { seedBooks } from "./scripts/bookSeed";
+const bookData = require('./data/books.json');
 
 const sql = new Pool({
   user: "postgres",
@@ -11,8 +13,6 @@ const sql = new Pool({
 export const query = (text: string, params?: any[]) => sql.query(text, params);
 
 const createTableIfNotExists = async () => {
-
-  
   const createUserTableQuery = `
   CREATE TABLE IF NOT EXISTS users (
   user_id SERIAL PRIMARY KEY,
@@ -27,29 +27,28 @@ const createTableIfNotExists = async () => {
 
   const createBookTableQuery = `
     CREATE TABLE IF NOT EXISTS books (
-  book_id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  author VARCHAR(100) NOT NULL,
-  description TEXT,
+  book_id VARCHAR(255) PRIMARY KEY,
+  title TEXT,
+  author TEXT ,
+  description TEXT ,
   rating VARCHAR(10),
   pages INTEGER,
-  publish_date DATE,
+  publish_date TEXT,
   num_ratings INTEGER,
-  cover_img VARCHAR(255),
-  publisher VARCHAR(100),
+  cover_img TEXT,
+  publisher TEXT,
   price DECIMAL(10, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   user_id INTEGER REFERENCES users(user_id)
   );
   `;
 
-
   const createLikeTableQuery = `
   CREATE TABLE IF NOT EXISTS likes (
   like_id SERIAL PRIMARY KEY,
   liked BOOLEAN NOT NULL,
   user_id INTEGER REFERENCES users(user_id),
-  book_id INTEGER REFERENCES books(book_id),
+  book_id VARCHAR(100) REFERENCES books(book_id),
   UNIQUE(user_id, book_id)
 );
 `;
@@ -65,7 +64,7 @@ CREATE TABLE IF NOT EXISTS genres (
 CREATE TABLE IF NOT EXISTS genre_books (
   id SERIAL PRIMARY KEY,
   genre_id INTEGER REFERENCES genres(genre_id),
-  book_id INTEGER REFERENCES books(book_id),
+  book_id VARCHAR(100) REFERENCES books(book_id),
   UNIQUE(genre_id, book_id)
 );
 `;
@@ -81,5 +80,6 @@ CREATE TABLE IF NOT EXISTS genre_books (
   }
 };
 
-
 createTableIfNotExists();
+
+// seedBooks(bookData);

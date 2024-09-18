@@ -1,17 +1,20 @@
-//configure the server
 import express from 'express';
+const cookieParser = require('cookie-parser');
+import cors from 'cors';
+import bookRoutes from './routes/bookRoutes';
+import authRoutes from './routes/authRoute'
+import { corsOptions } from './middlewares/cors';
+
+//configure the server
 const server = express();
 const port = 4000;
 
-import cors from 'cors';
-import { corsOptions } from './middlewares/middleware';
-
+server.use(cookieParser()) //middleware for parsing cookies
 server.use(cors(corsOptions)); //cors middleware
 server.use(express.json()) //middleware for parsing JSON
 
 //configure the routes
-import bookRoutes from './routes/bookRoutes';
-server.use(bookRoutes);
+server.use(authRoutes, bookRoutes);
 
 //start the server
 server.listen(port, () => {

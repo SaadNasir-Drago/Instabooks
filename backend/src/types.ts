@@ -1,18 +1,19 @@
 //create a separate folder for types if in surpasses more than 5 entries
+
 export type Book = {
-  book_id: number;
-  title: string;
-  author: string;
-  description: string;
-  rating: string;
-  pages: number;
-  publishDate: Date;
-  numRatings: number;
+  book_id: string;
+  title: string | null;
+  author: string | null;
+  description: string | null;
+  rating: number;
+  pages: number | null;
+  publishDate: Date | null;
+  numRatings: number | null;
   coverImg: string;
-  publisher: string;
-  price: number;
-  created_at: Date;
-  user_id: number; // Foreign key to the User who created the book
+  publisher: string | null;
+  price: number | null;
+  created_at?: Date;
+  user_id?: number; 
 };
 
 type Genre = {

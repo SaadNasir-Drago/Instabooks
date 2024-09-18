@@ -1,7 +1,7 @@
 import { query } from "../database";
 import { Book } from "../types";
 
-//put error handling
+//put error handling in all routes
 export const getAllBooks = async () => {
   const result = await query('SELECT * FROM books');
   return result.rows;

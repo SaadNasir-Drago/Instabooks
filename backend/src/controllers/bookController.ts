@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import * as bookService from "../services/bookService";
+import * as bookModel from "../models/bookModel";
 
 export const getAllBooks = async (req: Request, res: Response) => {
   try {
-    const books = await bookService.getAllBooks();
+    const books = await bookModel.getAllBooks();
     res.json(books);
   } catch (error) {
     res.status(500).send('Error fetching books')
@@ -13,7 +13,7 @@ export const getAllBooks = async (req: Request, res: Response) => {
 export const getBookById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const book = await bookService.getBookById(parseInt(id, 10));
+    const book = await bookModel.getBookById(parseInt(id, 10));
     if (book) {
       res.json(book);
     } else {
@@ -26,7 +26,7 @@ export const getBookById = async (req: Request, res: Response) => {
 
 export const createBook = async (req: Request, res: Response) => {
   try {
-    await bookService.createBook(req.body)
+    await bookModel.createBook(req.body)
     res.status(201).send('Book added successfully')
   } catch (error) {
     res.status(500).send('Error adding books')
@@ -36,7 +36,7 @@ export const createBook = async (req: Request, res: Response) => {
 export const updateBook = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    await bookService.updateBook(parseInt(id, 10), req.body)
+    await bookModel.updateBook(parseInt(id, 10), req.body)
     res.status(200).send('Book updated successfully');
   } catch (error) {
     res.status(500).send('Error updating books')
@@ -46,7 +46,7 @@ export const updateBook = async (req: Request, res: Response) => {
 export const deleteBook = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    await bookService.deleteBook(parseInt(id, 10))
+    await bookModel.deleteBook(parseInt(id, 10))
     res.status(200).send('Book deleted successfully');
   } catch (error) {
     res.status(500).send('Error deleting books')
