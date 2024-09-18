@@ -7,41 +7,7 @@ import BookList from "@/components/book/bookList";
 import { bookContext, selectedBookContext } from "@/context/bookContext";
 
 export default function Home() {
-  const [books, setBooks] = useState<Book[] | []>([
-    {
-      book_id: "1",
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      description:
-        "A novel set in the 1920s, exploring themes of wealth, love, and the American Dream.",
-      rating: 4.5,
-      pages: 180,
-      publishDate: new Date("1925-04-10"),
-      numRatings: 2500,
-      coverImg:
-        "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1433182986l/25644601._SY475_.jpg",
-      publisher: "Scribner",
-      price: 10.99,
-      created_at: new Date(),
-      user_id: 123,
-    },
-    {
-      book_id: "2",
-      title: "1984",
-      author: "George Orwell",
-      description:
-        "A dystopian novel depicting a totalitarian society under constant surveillance.",
-      rating: 4.8,
-      pages: 328,
-      publishDate: new Date("1949-06-08"),
-      numRatings: 5000,
-      coverImg: "https://example.com/1984-cover.jpg",
-      publisher: "Secker & Warburg",
-      price: 12.49,
-      created_at: new Date(),
-      user_id: 124,
-    },
-  ]);
+  const [books, setBooks] = useState<Book[] | []>([]);
 
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 

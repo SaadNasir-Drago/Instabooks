@@ -12,7 +12,7 @@ export const getBooks = async (req: Request, res: Response) => {
 
     // Fetch paginated books
     const books = await bookModel.getBooks(limit, offset);
-
+    
     // Calculate total pages
     const totalPages = Math.ceil(totalBooks / limit);
 

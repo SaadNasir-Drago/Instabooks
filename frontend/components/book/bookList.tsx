@@ -18,8 +18,10 @@ function BookList() {
   const fetchBooks = async (page: number) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`http://localhost:4000/books?page=${page}&limit=16`)
+      const response = await fetch(`http://localhost:4000/books?page=${page}&limit=28`)
       const data = await response.json()
+      console.log(data.books);
+    
       setBooks(data.books)
       setTotalPages(data.totalPages)
     } catch (error) {
@@ -29,17 +31,18 @@ function BookList() {
   }
 
   const handleBookClick = (book: any) => {
+    
     setSelectedBook(book)
   }
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
   }
-
+  
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {books.map((book) => (
+        {books.map((book: any) => (
           <Card
             key={book.book_id}
             className="shadow-md"
@@ -47,14 +50,16 @@ function BookList() {
               handleBookClick(book)
             }}
           >
+           
             <Link href="#" prefetch={false}>
+            
               <img
-                src={book.coverImg}
+                src={book.cover_img}
                 width={300}
                 height={200}
-                className="w-full h-30 object-cover rounded-t-md"
-                style={{ aspectRatio: "300/200", objectFit: "cover" }}
-              />
+                className="w-full h-30 rounded-t-md"
+                // style={{ aspectRatio: "300/200", objectFit: "cover" }}
+              /> 
               <CardContent>
                 <h2 className="text-xl font-bold mb-2">{book.title}</h2>
                 <p className="text-gray-500 mb-2">{book.author}</p>
