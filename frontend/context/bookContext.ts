@@ -3,7 +3,7 @@ import { Book } from '../../backend/src/types';
 
 // Define the shape of the context value
 interface SelectedBookContextType {
-  selectedBook: Book | null;
+  selectedBook: any | null;
   setSelectedBook: Dispatch<SetStateAction<Book | null>>;
 }
 
