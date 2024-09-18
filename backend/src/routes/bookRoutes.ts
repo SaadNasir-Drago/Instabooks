@@ -1,11 +1,12 @@
 import { Router } from "express";
 const router = Router();
 import * as bookController from '../controllers/bookController'
+import { cookieJwtAuth } from "../middlewares/cookieJwtAuth";
 
-router.get('/', bookController.getAllBooks);
-router.get('/:id', bookController.getBookById);
-router.post('/', bookController.createBook);
-router.put('/:id', bookController.updateBook);
-router.delete('/:id', bookController.deleteBook);
+router.get('/books', bookController.getBooks);
+router.get('/books/:id', bookController.getBookById);
+router.post('/books', bookController.createBook);
+router.put('/books/:id', bookController.updateBook);
+router.delete('/books/:id', cookieJwtAuth, bookController.deleteBook);
 
 export default router;

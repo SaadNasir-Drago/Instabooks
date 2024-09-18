@@ -2,10 +2,19 @@ import { query } from "../database";
 import { Book } from "../types";
 
 //put error handling in all routes
-export const getAllBooks = async () => {
-  const result = await query('SELECT * FROM books');
+export const getBooks = async (limit: number, offset: number) => {
+  const result = await query(
+    'SELECT * FROM books LIMIT $1 OFFSET $2',
+    [limit, offset]
+  );
   return result.rows;
 }
+
+export const getTotalBooks = async () => {
+  const totalBooksResult = await query('SELECT COUNT(*) FROM books');
+  return parseInt(totalBooksResult.rows[0].count);
+}
+
 //the placeholder $1 prevents sql injection attacks
 export const getBookById = async (id: number): Promise<Book[] | null> => {
   const result = await query('SELECT * FROM books WHERE id = $1', [id])

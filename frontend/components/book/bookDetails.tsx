@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import { Button } from '../ui/button'
-import { bookContext, selectedBookContext } from '@/context/bookContext';
-import { error } from 'console';
+import { selectedBookContext } from '@/context/bookContext';
 
 function BookDetails() {
 
@@ -12,7 +11,6 @@ function BookDetails() {
   };
 
   return (
-    
       <div className="grid grid-cols-1 gap-8">
         <div>
           <img

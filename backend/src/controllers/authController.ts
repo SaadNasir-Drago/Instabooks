@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as authModel from "../models/authModel";
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 export const verifyUser = async (req: Request, res: Response) => {
   // const { email, password } = req.body;
@@ -16,7 +17,7 @@ export const verifyUser = async (req: Request, res: Response) => {
     }
     // delete userEmailPass.password;
 
-    const token = jwt.sign(userEmailPass, 'hello', {expiresIn: "1h"})
+    const token = jwt.sign(userEmailPass, process.env.SECRET, {expiresIn: "1h"})
     res.cookie("token", token, {
       httpOnly:true
     })

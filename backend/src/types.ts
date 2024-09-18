@@ -16,31 +16,50 @@ export type Book = {
   user_id?: number; 
 };
 
-type Genre = {
+export type Genre = {
   genre_id: number;
-  genre_name: string;
+  genre_name: string | null;
 };
 
-type GenreBook = {
+export type GenreBook = {
   id: number;
   genre_id: number;
   book_id: number;
 };
 
-type Like = {
+export type Like = {
   like_id: number;
   liked: boolean;
-  user_id: number; // Foreign key to User
-  book_id: number; // Foreign key to Book
+  user_id?: number; // Foreign key to User
+  book_id?: number; // Foreign key to Book
 };
 
 export type User = {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-  role: string;
-  created_at: Date;
+  user_id: number | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  password: string | null;
+  role: string | null;
+  created_at?: Date;
 };
 
+export type jsonBook = {
+  bookId: string;
+  title: string;
+  series?: string; // Optional property (indicated by the question mark)
+  rating: string; // Can be represented as a string for simplicity
+  language: string;
+  bookFormat: string;
+  pages: string; // Can be represented as a string for simplicity
+  publishDate: string;
+  firstPublishDate?: string; // Optional property
+  numRatings: string; // Can be represented as a string for simplicity
+  likedPercent: string; // Can be represented as a string for simplicity
+  coverImg: string;
+  price: string; // Can be represented as a string for simplicity
+  author: string;
+  description: string;
+  genre: string; // Consider using an array of strings if genre can have multiple values
+  publisher: string;
+}

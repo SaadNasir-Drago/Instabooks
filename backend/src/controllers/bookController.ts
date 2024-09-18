@@ -1,10 +1,26 @@
 import { Request, Response } from "express";
 import * as bookModel from "../models/bookModel";
 
-export const getAllBooks = async (req: Request, res: Response) => {
+export const getBooks = async (req: Request, res: Response) => {
+
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 16;
+  const offset = (page - 1) * limit;
+
   try {
-    const books = await bookModel.getAllBooks();
-    res.json(books);
+    const totalBooks = await bookModel.getTotalBooks();
+
+    // Fetch paginated books
+    const books = await bookModel.getBooks(limit, offset);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalBooks / limit);
+
+    // Send the books and pagination info
+    res.json({
+      books,
+      totalPages,
+    });
   } catch (error) {
     res.status(500).send('Error fetching books')
   }
