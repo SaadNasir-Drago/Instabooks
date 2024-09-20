@@ -14,17 +14,16 @@ export const verifyUser = async (req: Request, res: Response) => {
     }
     delete userData.password;
 
-    const token = jwt.sign(userData, process.env.SECRET, {expiresIn: "2h"})
+    const token = jwt.sign(userData, process.env.SECRET, {expiresIn: "1h"})
     res.cookie("token", token, {
-      httpOnly:true,
-      maxAge: 60 * 60 * 2000 
+      // httpOnly:true,
+      maxAge: 60 * 60 * 1000 
     })
     
     res.setHeader('Content-Type', 'application/json');
    // Example of sending a JSON response
    res.status(200).json({ message: 'Login successful', token, userData });
 
-   
   } catch (error) {
 
     res.status(500).send('error');

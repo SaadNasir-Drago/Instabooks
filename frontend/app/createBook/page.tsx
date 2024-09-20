@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import Cookies from "js-cookie";
 
 export default function AddBook() {
   const router = useRouter();
@@ -23,43 +24,56 @@ export default function AddBook() {
     author: "",
     description: "",
     publisher: "",
-    user_id: "" // This should be set to the current user's ID in a real application
+    user_id: "", // This should be set to the current user's ID in a real application
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setBookData(prev => ({
+    setBookData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Retrieve the token from cookies
+    const token = Cookies.get("token");
+    console.log(document.cookie);
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:4000/createBook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:4000/createBook", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(bookData),
+        credentials: "include"
       });
-      
+
       if (response.ok) {
         toast({
           title: "Success",
           description: "Book added successfully",
         });
-        router.push('/'); // Redirect to books list page
+        router.push("/"); // Redirect to books list page
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add book');
+        throw new Error(errorData.message || "Failed to add book");
       }
     } catch (error) {
       console.error("Error adding book:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add book. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to add book. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -214,7 +228,7 @@ export default function AddBook() {
         <Button
           variant="link"
           className="mt-4 w-full"
-          onClick={() => router.push('/')}
+          onClick={() => router.push("/")}
         >
           Back to Homepage
         </Button>

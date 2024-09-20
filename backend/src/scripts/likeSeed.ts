@@ -10,22 +10,39 @@ const cleanLikeData = (like: Like): Like => {
   };
 };
 
-export const cleanBooksArray = (books: jsonBook[]) => {
-  return books.map((book) => ({
-    book_id: book.bookId,
-    title: isAscii(book.title) && book.title?.length ? book.title?.trim() : null,
-    rating: book.rating ? parseFloat(book.rating) : null,
-    pages: parseInt(book.pages) || 0,
-    publishDate: new Date(book.publishDate) || null,
-    numRatings: parseInt(book.numRatings) || null,
-    coverImg: book.coverImg || null,
-    price: parseFloat(book.price?.trim()) || null, // Remove any extra spaces or line breaks
-    author: isAscii(book.author) && book.author?.length ? book.author?.trim() : null, // Remove any extra spaces or line breaks
-    description: isAscii(book.description) ? book.description?.trim() : null, // Remove any extra spaces or line breaks
-    publisher: isAscii(book.publisher) ? book.publisher?.trim() : null, // Remove any extra spaces or line breaks
-  }));
-};
+// export const cleanBooksArray = (books: jsonBook[]) => {
+//   return books.map((book) => ({
+//     book_id: book.bookId,
+//     title: isAscii(book.title) && book.title?.length ? book.title?.trim() : null,
+//     rating: book.rating ? parseFloat(book.rating) : null,
+//     pages: parseInt(book.pages) || 0,
+//     publishDate: new Date(book.publishDate) || null,
+//     numRatings: parseInt(book.numRatings) || null,
+//     coverImg: book.coverImg || null,
+//     price: parseFloat(book.price?.trim()) || null, // Remove any extra spaces or line breaks
+//     author: isAscii(book.author) && book.author?.length ? book.author?.trim() : null, // Remove any extra spaces or line breaks
+//     description: isAscii(book.description) ? book.description?.trim() : null, // Remove any extra spaces or line breaks
+//     publisher: isAscii(book.publisher) ? book.publisher?.trim() : null, // Remove any extra spaces or line breaks
+//   }));
+// };
 
+export const cleanBooksArray = (books: jsonBook[]) => {
+  return books
+    .filter(book => book.coverImg !== null && book.bookId !== null) // Filter out books with null coverImg or book_id
+    .map((book) => ({
+      book_id: book.bookId,
+      title: isAscii(book.title) && book.title?.length ? book.title?.trim() : null,
+      rating: book.rating ? parseFloat(book.rating) : null,
+      pages: parseInt(book.pages) || 0,
+      publishDate: new Date(book.publishDate) || null,
+      numRatings: parseInt(book.numRatings) || null,
+      coverImg: book.coverImg || null,
+      price: parseFloat(book.price?.trim()) || null, // Remove any extra spaces or line breaks
+      author: isAscii(book.author) && book.author?.length ? book.author?.trim() : null, // Remove any extra spaces or line breaks
+      description: isAscii(book.description) ? book.description?.trim() : null, // Remove any extra spaces or line breaks
+      publisher: isAscii(book.publisher) ? book.publisher?.trim() : null, // Remove any extra spaces or line breaks
+    }));
+};
 
 const getRandomUserId = (users: User[]): number => {
   const randomIndex = Math.floor(Math.random() * users.length);
@@ -40,10 +57,10 @@ const getRandomBookId = (books: Book[]): string => {
 // Function to insert like data into PostgreSQL
 export const seedLikes = async (likes: Like[], users: User[], books: jsonBook[]) => {
   const booksArray = cleanBooksArray(books);
+
   for (const likeData of likes) {
     const cleanedLike = cleanLikeData(likeData);
     
-   
     try {
       const queryText = `
         INSERT INTO likes (

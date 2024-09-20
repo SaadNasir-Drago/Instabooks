@@ -55,7 +55,7 @@ const createTableIfNotExists = async () => {
   price DECIMAL(10, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- user_id INTEGER REFERENCES users(user_id)
-  user_id SERIAL
+  user_id INTEGER
   ); 
   `;
 

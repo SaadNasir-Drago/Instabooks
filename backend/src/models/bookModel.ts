@@ -25,15 +25,12 @@ export const createBook = async (book: Book): Promise<void> => {
   try {
     const queryText = `
     INSERT INTO books (
-      book_id, title, rating, pages, publish_date, num_ratings, cover_img, price, author, description, publisher
+      book_id, title, rating, pages, publish_date, num_ratings, cover_img, price, author, description, publisher, user_id
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
     )
     ON CONFLICT (book_id) DO NOTHING;
   `;
-
-    // Assuming `getRandomUserId` is a function that gets a random user_id from the `users` table
-    // const randomUserId = await getRandomUserId(user);
 
     const values = [
       book.book_id,
@@ -47,7 +44,7 @@ export const createBook = async (book: Book): Promise<void> => {
       book.author,
       book.description,
       book.publisher,
-      // randomUserId, // Insert a random user_id as the foreign key
+      book.user_id
     ];
 
     await query(queryText, values);

@@ -12,7 +12,7 @@ export const cleanBookData = (book: jsonBook) => {
   return {
     book_id: book.bookId,
     title: isAscii(book.title) && book.title?.length ? book.title?.trim() : null,
-    rating: book.rating || null,
+    rating: book.rating ? parseFloat(book.rating) : null,
     pages: parseInt(book.pages) || 0,
     publishDate: new Date(book.publishDate) || null,
     numRatings: parseInt(book.numRatings) || null,
@@ -33,7 +33,7 @@ const getRandomUserId = (users: User[]): number => {
 // Function to insert data into PostgreSQL
 export const seedBooks = async (books: jsonBook[], user: User[]) => {
  
-  let i = 0;
+  // let i = 0;
   for (const bookData of books) {
     const cleanedBook = cleanBookData(bookData);
     if (
@@ -73,7 +73,7 @@ export const seedBooks = async (books: jsonBook[], user: User[]) => {
       ];
 
       await query(queryText, values);
-      i++;
+      // i++;
     } catch (error) {
       console.error(`Error inserting book with ID ${cleanedBook.book_id}:`, error);
     }

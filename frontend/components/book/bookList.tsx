@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 function BookList() {
 
-  const placeholder = "https://placehold.co/600x400";
+  const placeholder = "https://placehold.jp/150x150.png";
 
   const { books, setBooks } = useContext(bookContext);
   const { setSelectedBook } = useContext(selectedBookContext);
@@ -92,6 +92,7 @@ function BookList() {
                   fill
                   className="object-contain"
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                  unoptimized
                 />
               </div>
               <CardContent className="p-4">
