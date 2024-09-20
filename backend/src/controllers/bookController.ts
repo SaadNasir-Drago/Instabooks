@@ -42,6 +42,7 @@ export const getBookById = async (req: Request, res: Response) => {
 
 export const createBook = async (req: Request, res: Response) => {
   try {
+    console.log(req.body)
     await bookModel.createBook(req.body)
     res.status(201).send('Book added successfully')
   } catch (error) {
@@ -68,3 +69,12 @@ export const deleteBook = async (req: Request, res: Response) => {
     res.status(500).send('Error deleting books')
   }
 }
+
+// export const likeBook = async (req: Request, res: Response) => {
+//   try {
+//     await bookModel.likeBook(req.body)
+//     res.status(201).send('Book added successfully')
+//   } catch (error) {
+//     res.status(500).send('Error adding books')
+//   }
+// }

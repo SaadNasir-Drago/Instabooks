@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 import cors from 'cors';
 import bookRoutes from './routes/bookRoutes';
 import authRoutes from './routes/authRoute'
+import userRoutes from './routes/userRoute'
 import { corsOptions } from './middlewares/cors';
 
 //configure the server
@@ -14,7 +15,7 @@ server.use(cors(corsOptions)); //cors middleware
 server.use(express.json()) //middleware for parsing JSON
 
 //configure the routes
-server.use(authRoutes, bookRoutes);
+server.use(authRoutes, bookRoutes, userRoutes);
 
 //start the server
 server.listen(port, () => {

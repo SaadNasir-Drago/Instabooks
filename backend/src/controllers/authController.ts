@@ -4,25 +4,26 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 export const verifyUser = async (req: Request, res: Response) => {
-  // const { email, password } = req.body;
-    //test data
-    const email = "saad@gmail.com"
-    const password = "12345"
-  try {
-    const userEmailPass = await authModel.getUserByEmail(email);
-   
+  const { email, password } = req.body;
     
-    if (userEmailPass.password !== password) {
+  try {
+   const userData =  await authModel.getUserByEmail(email);
+    
+    if (userData.password !== password) {
       res.status(403).send("Invalid Login");
     }
-    // delete userEmailPass.password;
+    delete userData.password;
 
-    const token = jwt.sign(userEmailPass, process.env.SECRET, {expiresIn: "1h"})
+    const token = jwt.sign(userData, process.env.SECRET, {expiresIn: "2h"})
     res.cookie("token", token, {
-      httpOnly:true
+      httpOnly:true,
+      maxAge: 60 * 60 * 2000 
     })
+    
+    res.setHeader('Content-Type', 'application/json');
+   // Example of sending a JSON response
+   res.status(200).json({ message: 'Login successful', token, userData });
 
-    res.status(200).send("Login successful")
    
   } catch (error) {
 

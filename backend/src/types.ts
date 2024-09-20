@@ -5,11 +5,11 @@ export type Book = {
   title: string | null;
   author: string | null;
   description: string | null;
-  rating: number;
+  rating: number | null;
   pages: number | null;
   publishDate: Date | null;
   numRatings: number | null;
-  coverImg: string;
+  coverImg: string | null;
   publisher: string | null;
   price: number | null;
   created_at?: Date;
@@ -22,7 +22,7 @@ export type Genre = {
 };
 
 export type GenreBook = {
-  id: number;
+  id?: number;
   genre_id: number;
   book_id: number;
 };
@@ -35,7 +35,7 @@ export type Like = {
 };
 
 export type User = {
-  user_id: number | null;
+  user_id: number ;
   first_name: string | null;
   last_name: string | null;
   email: string | null;
@@ -46,9 +46,9 @@ export type User = {
 
 export type jsonBook = {
   bookId: string;
-  title: string;
+  title: string | null;
   series?: string; // Optional property (indicated by the question mark)
-  rating: string; // Can be represented as a string for simplicity
+  rating: string | null; // Can be represented as a string for simplicity
   language: string;
   bookFormat: string;
   pages: string; // Can be represented as a string for simplicity

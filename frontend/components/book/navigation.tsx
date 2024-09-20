@@ -1,14 +1,22 @@
-"use client"
-import React, { useState } from 'react'
-import { Input } from '../ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
+"use client";
+import React, { useState } from "react";
+import { Input } from "../ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function Navigation() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("trending");
-  const [user, setUser] = useState<{user_id: number} | null>(null);
-  
+  const [user, setUser] = useState<{ user_id: number } | null>(null);
+
   // sort books by trending
   // const sortedBooks = useMemo(() => {
   //   if (sortBy === "trending") {
@@ -33,10 +41,9 @@ function Navigation() {
   //     book.title?.toLowerCase().includes(searchTerm.toLowerCase())
   //   );
   // }, [books, searchTerm]);
-  
 
   const handleLogin = () => {
-    setUser({user_id: 102});
+    router.push("/login");
   };
 
   const handleLogout = () => {
@@ -45,42 +52,54 @@ function Navigation() {
 
   return (
     <div className="flex justify-between flex-wrap items-center mb-6">
-        <h1 className="text-4xl font-bold ">Instabooks</h1>
-        <div className="flex items-center gap-4">
-          <Input
-            placeholder="Search books..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-64"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost">
-                {sortBy === "trending" ? "Trending" : "Recent"}
-                <ChevronDownIcon className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSortBy("trending")}>
-                Trending
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortBy("recent")}>
-                Recent
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {user ? (
-            <Button variant="destructive" onClick={handleLogout}>
-              Logout
+      <h1 className="text-4xl font-bold ">Instabooks</h1>
+      <div className="flex items-center gap-4">
+        <Input
+          placeholder="Search books..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-64"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost">
+              {sortBy === "trending" ? "Trending" : "Recent"}
+              <ChevronDownIcon className="w-4 h-4 ml-2" />
             </Button>
-          ) : (
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setSortBy("trending")}>
+              Trending
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy("recent")}>
+              Recent
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Link href="/createUser">
+          <Button variant="default" className="bg-blue-700">
+            Register
+          </Button>
+        </Link>
+        <Link href="/createBook">
+          <Button variant="default" className="bg-orange-600">
+            Add Book
+          </Button>
+        </Link>
+        {user ? (
+          <Button variant="destructive" onClick={handleLogout}>
+            Logout
+          </Button>
+        ) : (
+          <Link href="/login">
             <Button variant="default" onClick={handleLogin}>
               Login
             </Button>
-          )}
-        </div>
+          </Link>
+        )}
       </div>
-  )
+    </div>
+  );
 }
 
 function ChevronDownIcon(props: any) {

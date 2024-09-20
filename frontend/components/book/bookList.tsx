@@ -1,43 +1,62 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Card, CardContent, CardFooter } from '../ui/card'
-import Link from 'next/link'
-import { bookContext, selectedBookContext } from '@/context/bookContext'
-import { Button } from '../ui/button'
-
+import React, { useContext, useEffect, useState } from "react";
+import { Card, CardContent, CardFooter } from "../ui/card";
+import Link from "next/link";
+import { bookContext, selectedBookContext } from "@/context/bookContext";
+import { Button } from "../ui/button";
+import Image from "next/image";
 function BookList() {
-  const { books, setBooks } = useContext(bookContext)
-  const { setSelectedBook } = useContext(selectedBookContext)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(5)
-  const [isLoading, setIsLoading] = useState(false)
+
+  const placeholder = "https://placehold.co/600x400";
+
+  const { books, setBooks } = useContext(bookContext);
+  const { setSelectedBook } = useContext(selectedBookContext);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetchBooks(currentPage)
-  }, [currentPage])
+    fetchBooks(currentPage);
+  }, [currentPage]);
 
   const fetchBooks = async (page: number) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:4000/books?page=${page}&limit=28`)
-      const data = await response.json()
+      const response = await fetch(
+        `http://localhost:4000/books?page=${page}&limit=20`
+      );
+      const data = await response.json();
       console.log(data.books);
-    
-      setBooks(data.books)
-      setTotalPages(data.totalPages)
+
+      setBooks(data.books);
+      setTotalPages(data.totalPages);
     } catch (error) {
-      console.error('Error fetching books:', error)
+      console.error("Error fetching books:", error);
     }
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
+
+  // const fetchLikes = async () => {
+  //   setIsLoading(true)
+  //   try {
+  //     const response = await fetch(`http://localhost:4000/books?page=${page}&limit=28`)
+  //     const data = await response.json()
+  //     console.log(data.books);
+
+  //     setBooks(data.books)
+  //     setTotalPages(data.totalPages)
+  //   } catch (error) {
+  //     console.error('Error fetching books:', error)
+  //   }
+  //   setIsLoading(false)
+  // }
 
   const handleBookClick = (book: any) => {
-    
-    setSelectedBook(book)
-  }
+    setSelectedBook(book);
+  };
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-  }
+    setCurrentPage(newPage);
+  };
 
   const handleLike = (bookId: any) => {
     // setBooks((prevBooks) =>
@@ -54,64 +73,62 @@ function BookList() {
     //   )
     // );
   };
-  
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {books.map((book: any) => (
           <Card
             key={book.book_id}
-            className="shadow-md"
-            onClick={() => {
-              handleBookClick(book)
-            }}
+            className="shadow-md overflow-hidden"
+            onClick={() => handleBookClick(book)}
           >
-           
-            <Link href="#" prefetch={false}>
-              <img
-                src={book.cover_img}
-                alt={book.title}
-                
-                // width={400}
-                // height={300}
-                // className="w-full h-30 rounded-t-md"
-                // style={{ aspectRatio: "68/100", objectFit: "contain" }}
-              /> 
-              <CardContent>
-                <h2 className="text-xl font-bold mb-2">{book.title}</h2>
+            <Link href="#" prefetch={false} className="block">
+              <div className="aspect-[2/3] relative p-2 bg-gray-100">
+                <Image
+                  src={book.cover_img || placeholder}
+                  // placeholder = 'empty'
+                  alt={book.title}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                />
+              </div>
+              <CardContent className="p-4">
+                <h2 className="text-xl font-bold mb-2 line-clamp-2">
+                  {book.title}
+                </h2>
                 <p className="text-gray-500 mb-2">{book.author}</p>
-                <p className="text-gray-600 line-clamp-3">
-                  {book.description}
-                </p>
+                <p className="text-gray-600 line-clamp-3">{book.description}</p>
               </CardContent>
             </Link>
             <CardFooter className="flex justify-between items-center p-4">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(book.id);
-                    }}
-                  >
-                    <ThumbsUpIcon className="w-5 h-5 text-green-500" />
-                    <span className="sr-only">Like</span>
-                  </Button>
-                  <div className="text-gray-500">{book.likes}</div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDislike(book.id);
-                    }}
-                  >
-                    <ThumbsDownIcon className="w-5 h-5 text-red-500" />
-                    <span className="sr-only">Dislike</span>
-                  </Button>
-                  <div className="text-gray-500">{book.dislikes}</div>
-                </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike(book.id);
+                  }}
+                >
+                  <ThumbsUpIcon className="w-5 h-5 text-green-500" />
+                  <span className="sr-only">Like</span>
+                </Button>
+                <div className="text-gray-500">{book.likes}</div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDislike(book.id);
+                  }}
+                >
+                  <ThumbsDownIcon className="w-5 h-5 text-red-500" />
+                  <span className="sr-only">Dislike</span>
+                </Button>
+                <div className="text-gray-500">{book.dislikes}</div>
+              </div>
             </CardFooter>
           </Card>
         ))}
@@ -134,10 +151,86 @@ function BookList() {
         </Button>
       </div>
     </div>
-  )
+    // <div>
+    //   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    //     {books.map((book: any) => (
+    //       <Card
+    //         key={book.book_id}
+    //         className="shadow-md"
+    //         onClick={() => {
+    //           handleBookClick(book)
+    //         }}
+    //       >
+
+    //         <Link href="#" prefetch={false}>
+    //           <img
+    //             src={book.cover_img}
+    //             alt={book.title}
+
+    //             // width={400}
+    //             // height={300}
+    //             // className="w-full h-30 rounded-t-md"
+    //             // style={{ aspectRatio: "68/100", objectFit: "contain" }}
+    //           />
+    //           <CardContent>
+    //             <h2 className="text-xl font-bold mb-2">{book.title}</h2>
+    //             <p className="text-gray-500 mb-2">{book.author}</p>
+    //             <p className="text-gray-600 line-clamp-3">
+    //               {book.description}
+    //             </p>
+    //           </CardContent>
+    //         </Link>
+    //         <CardFooter className="flex justify-between items-center p-4">
+    //             <div className="flex items-center gap-2">
+    //               <Button
+    //                 variant="ghost"
+    //                 size="icon"
+    //                 onClick={(e) => {
+    //                   e.stopPropagation();
+    //                   handleLike(book.id);
+    //                 }}
+    //               >
+    //                 <ThumbsUpIcon className="w-5 h-5 text-green-500" />
+    //                 <span className="sr-only">Like</span>
+    //               </Button>
+    //               <div className="text-gray-500">{book.likes}</div>
+    //               <Button
+    //                 variant="ghost"
+    //                 size="icon"
+    //                 onClick={(e) => {
+    //                   e.stopPropagation();
+    //                   handleDislike(book.id);
+    //                 }}
+    //               >
+    //                 <ThumbsDownIcon className="w-5 h-5 text-red-500" />
+    //                 <span className="sr-only">Dislike</span>
+    //               </Button>
+    //               <div className="text-gray-500">{book.dislikes}</div>
+    //             </div>
+    //         </CardFooter>
+    //       </Card>
+    //     ))}
+    //   </div>
+    //   <div className="mt-6 flex justify-center items-center">
+    //     <Button
+    //       onClick={() => handlePageChange(currentPage - 1)}
+    //       disabled={currentPage === 1 || isLoading}
+    //     >
+    //       Previous
+    //     </Button>
+    //     <span className="mx-4">
+    //       Page {currentPage} of {totalPages}
+    //     </span>
+    //     <Button
+    //       onClick={() => handlePageChange(currentPage + 1)}
+    //       disabled={currentPage === totalPages || isLoading}
+    //     >
+    //       Next
+    //     </Button>
+    //   </div>
+    // </div>
+  );
 }
-
-
 
 function ThumbsDownIcon(props: any) {
   return (
@@ -179,4 +272,4 @@ function ThumbsUpIcon(props: any) {
   );
 }
 
-export default BookList
+export default BookList;

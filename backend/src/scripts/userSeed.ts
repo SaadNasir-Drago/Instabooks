@@ -11,9 +11,16 @@ const isAscii = (str: string | null): boolean => {
 const cleanUserData = (user: User): User => {
   return {
     user_id: user.user_id,
-    first_name: isAscii(user.first_name) && user.first_name?.length ? user.first_name?.trim() : null,
-    last_name: isAscii(user.last_name) && user.last_name?.length ? user.last_name?.trim() : null,
-    email: isAscii(user.email) && user.email?.length ? user.email?.trim() : null,
+    first_name:
+      isAscii(user.first_name) && user.first_name?.length
+        ? user.first_name?.trim()
+        : null,
+    last_name:
+      isAscii(user.last_name) && user.last_name?.length
+        ? user.last_name?.trim()
+        : null,
+    email:
+      isAscii(user.email) && user.email?.length ? user.email?.trim() : null,
     password: user.password?.trim() || null, // Assuming password is always ASCII
     role: isAscii(user.role) && user.role?.length ? user.role?.trim() : null,
   };
@@ -26,9 +33,9 @@ export const seedUsers = async (users: User[]) => {
     try {
       const queryText = `
         INSERT INTO users (
-          user_id, first_name, last_name, email, password, role, created_at
+          user_id, first_name, last_name, email, password, role
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7
+          $1, $2, $3, $4, $5, $6
         )
         ON CONFLICT (user_id) DO NOTHING;
       `;
@@ -40,13 +47,22 @@ export const seedUsers = async (users: User[]) => {
         cleanedUser.email,
         cleanedUser.password,
         cleanedUser.role,
-        cleanedUser.created_at,
       ];
 
       await query(queryText, values);
     } catch (error) {
-      console.error(`Error inserting user with ID ${cleanedUser.user_id}:`, error);
+      console.error(
+        `Error inserting user with ID ${cleanedUser.user_id}:`,
+        error
+      );
     }
   }
+
+  const useridResult = await query("SELECT MAX(user_id) FROM users");
+  const maxUserId = useridResult.rows[0].max;
+
+  // Reset the sequence to start after the highest user_id
+  await query(`ALTER SEQUENCE users_user_id_seq RESTART WITH ${maxUserId + 1}`);
+  console.log(`User ID sequence reset to start from ${maxUserId + 1}`);
   console.log("User data inserted successfully");
 };

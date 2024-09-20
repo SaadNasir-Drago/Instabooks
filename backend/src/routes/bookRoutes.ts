@@ -5,8 +5,9 @@ import { cookieJwtAuth } from "../middlewares/cookieJwtAuth";
 
 router.get('/books', bookController.getBooks);
 router.get('/books/:id', bookController.getBookById);
-router.post('/books', bookController.createBook);
+router.post('/createBook', bookController.createBook);
 router.put('/books/:id', bookController.updateBook);
 router.delete('/books/:id', cookieJwtAuth, bookController.deleteBook);
 
+// router.post('/books/like', cookieJwtAuth, bookController.likeBook)
 export default router;

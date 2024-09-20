@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Book } from "../../backend/src/types";
 import { useState } from "react";
 import Navigation from "@/components/book/navigation";
@@ -15,8 +15,8 @@ export default function Home() {
   return (
     <div className="container mx-auto px-8 py-7">
       <Navigation />
-      <GenreList/>
-      <bookContext.Provider value={{books, setBooks}}>
+      <GenreList />
+      <bookContext.Provider value={{ books, setBooks }}>
         <selectedBookContext.Provider value={{ selectedBook, setSelectedBook }}>
           {selectedBook ? <BookDetails /> : <BookList />}
         </selectedBookContext.Provider>

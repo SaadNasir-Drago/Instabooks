@@ -3,6 +3,7 @@ import { seedBooks } from "./scripts/bookSeed";
 import { seedUsers } from "./scripts/userSeed";
 import { seedGenres } from "./scripts/genreSeed";
 import { seedLikes } from "./scripts/likeSeed";
+import { seedGenreBooks } from "./scripts/genreBookSeed";
 
 const bookData = require("./data/books.json");
 const userData = require("./data/user.json");
@@ -19,6 +20,11 @@ const sql = new Pool({
 
 export const query = (text: string, params?: any[]) => sql.query(text, params);
 
+const checkIfTableHasData = async (tableName: string) => {
+  const result = await query(`SELECT COUNT(*) FROM ${tableName}`);
+  return parseInt(result.rows[0].count, 10) > 0;
+};
+
 const createTableIfNotExists = async () => {
   const createUserTableQuery = `
   CREATE TABLE IF NOT EXISTS users (
@@ -27,26 +33,29 @@ const createTableIfNotExists = async () => {
   last_name VARCHAR(50) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
-  role VARCHAR(20) NOT NULL,
+  role VARCHAR(20) NOT NULL DEFAULT 'user',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 `;
 
   const createBookTableQuery = `
     CREATE TABLE IF NOT EXISTS books (
-  book_id VARCHAR(255) PRIMARY KEY,
-  title VARCHAR(100) NOT NULL,
-  author VARCHAR(255) NOT NULL,
+  book_id TEXT PRIMARY KEY,
+  -- title VARCHAR(100) NOT NULL,
+  title TEXT,
+  -- author VARCHAR(255) NOT NULL,
+  author TEXT,
   description TEXT,
-  rating VARCHAR(10) NOT NULL,
+  rating VARCHAR(10),
   pages INTEGER NOT NULL,
-  publish_date DATE,
-  num_ratings INTEGER NOT NULL,
+  publish_date VARCHAR(100),
+  num_ratings INTEGER ,
   cover_img TEXT,
   publisher VARCHAR(255),
   price DECIMAL(10, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  user_id INTEGER REFERENCES users(user_id)
+  -- user_id INTEGER REFERENCES users(user_id)
+  user_id SERIAL
   ); 
   `;
 
@@ -55,8 +64,7 @@ const createTableIfNotExists = async () => {
   like_id SERIAL PRIMARY KEY,
   liked BOOLEAN NOT NULL,
   user_id INTEGER REFERENCES users(user_id),
-  book_id VARCHAR(100) REFERENCES books(book_id),
-  UNIQUE(user_id, book_id)
+  book_id TEXT REFERENCES books(book_id)
 );
 `;
 
@@ -71,8 +79,7 @@ CREATE TABLE IF NOT EXISTS genres (
 CREATE TABLE IF NOT EXISTS genre_books (
   id SERIAL PRIMARY KEY,
   genre_id INTEGER REFERENCES genres(genre_id),
-  book_id VARCHAR(100) REFERENCES books(book_id),
-  UNIQUE(genre_id, book_id)
+  book_id TEXT REFERENCES books(book_id)
 );
 `;
 
@@ -84,13 +91,33 @@ CREATE TABLE IF NOT EXISTS genre_books (
     await query(createGenreBookTableQuery);
     console.log("Tables created successfully or already exists");
 
-    // Seed data after tables are created
-    // await seedUsers(userData);
-    // // await seedBooks(bookData, userData);
-    // await seedLikes(likeData);
-    // await seedGenres(genreData);
-    // //  await seedGenreBooks(genreBookData);
-    console.log("Data inserted successfully");
+    
+     // Check and seed users
+     if (!(await checkIfTableHasData('users'))) {
+      await seedUsers(userData);
+    }
+
+    // Check and seed books
+    if (!(await checkIfTableHasData('books'))) {
+      await seedBooks(bookData, userData);
+    }
+
+    // Check and seed likes
+    if (!(await checkIfTableHasData('likes'))) {
+      await seedLikes(likeData, userData, bookData);
+    }
+
+    // Check and seed genres
+    if (!(await checkIfTableHasData('genres'))) {
+      await seedGenres(genreData);
+    }
+
+    // Check and seed genre_books
+    if (!(await checkIfTableHasData('genre_books'))) {
+      await seedGenreBooks(bookData, userData);
+    }
+
+    console.log("Seed Data inserted successfully");
 
   } catch (error) {
     console.error("Error creating tables", error);
