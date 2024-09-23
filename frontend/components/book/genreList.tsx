@@ -1,29 +1,33 @@
-import React, { useState } from 'react'
-import { Genre } from '../../../backend/src/types';
+import React, { useEffect, useState } from "react";
+import { Genre } from "../../../backend/src/types";
+import { useGenre } from "@/context/genreContext";
 
-function GenreList(  ) {
-  const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null);
-  const genres = [
-    { genre_id: 1, genre_name: "Science Fiction" },
-    { genre_id: 2, genre_name: "Fantasy" },
-    { genre_id: 3, genre_name: "Mystery" },
-    { genre_id: 4, genre_name: "Romance" },
-    { genre_id: 5, genre_name: "Horror" },
-    // Add more genres as needed
-  ];
-  
-  // Optional: Fetch genres if not passed as props
-  // useEffect(() => {
-  //   async function fetchGenres() {
-  //     const response = await fetch('/api/genres');
-  //     const data = await response.json();
-  //     setGenres(data);
-  //   }
-  //   fetchGenres();
-  // }, []);
+function GenreList() {
+  const {selectedGenre, setSelectedGenre} = useGenre();
+  const [genres, setGenres] = useState<Genre[]>([{genre_id: 0, genre_name: "All"}]);
+
+  useEffect(() => {
+    async function fetchGenres() {
+      const response = await fetch(`http://localhost:4000/genres`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        // Set genres state to include the "All" genre along with fetched genres
+        setGenres([{ genre_id: 0, genre_name: "All" }, ...data]);
+
+        // Set the default selected genre to "All"
+        setSelectedGenre({ genre_id: 0, genre_name: "All" });
+        
+      } else {
+        console.error("Failed to fetch genres");
+      }
+    }
+    fetchGenres();
+  }, []);
 
   return (
-    <div className=" mb-6">
+    <div className="mb-6">
       <div className="flex flex-wrap gap-2">
         {genres.map((genre) => (
           <button
@@ -35,18 +39,12 @@ function GenreList(  ) {
             }`}
             onClick={() => setSelectedGenre(genre)}
           >
-            {genre.genre_name}
+            {genre.genre_name === "All" ? "All" : genre.genre_name}
           </button>
         ))}
       </div>
-      {/* {selectedGenre && (
-        <div className="p-4 border border-border rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">Selected Genre</h3>
-          <p>{selectedGenre.genre_name}</p>
-        </div>
-      )} */}
     </div>
-  )
+  );
 }
 
-export default GenreList
+export default GenreList;

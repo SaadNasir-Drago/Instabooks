@@ -40,10 +40,9 @@ const createTableIfNotExists = async () => {
 
   const createBookTableQuery = `
     CREATE TABLE IF NOT EXISTS books (
-  book_id TEXT PRIMARY KEY,
-  -- title VARCHAR(100) NOT NULL,
+  book_id SERIAL PRIMARY KEY,
+  bookId TEXT,
   title TEXT,
-  -- author VARCHAR(255) NOT NULL,
   author TEXT,
   description TEXT,
   rating VARCHAR(10),
@@ -54,24 +53,24 @@ const createTableIfNotExists = async () => {
   publisher VARCHAR(255),
   price DECIMAL(10, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  -- user_id INTEGER REFERENCES users(user_id)
-  user_id INTEGER
+  user_id INTEGER REFERENCES users(user_id)
+  -- user_id INTEGER
   ); 
   `;
 
   const createLikeTableQuery = `
   CREATE TABLE IF NOT EXISTS likes (
   like_id SERIAL PRIMARY KEY,
-  liked BOOLEAN NOT NULL,
+  liked BOOLEAN,
   user_id INTEGER REFERENCES users(user_id),
-  book_id TEXT REFERENCES books(book_id)
+  book_id INTEGER REFERENCES books(book_id)
 );
 `;
 
   const createGenreTableQuery = `
 CREATE TABLE IF NOT EXISTS genres (
   genre_id SERIAL PRIMARY KEY,
-  genre_name VARCHAR(50) UNIQUE NOT NULL
+  genre_name VARCHAR(100) UNIQUE NOT NULL
 );
 `;
 
@@ -79,7 +78,7 @@ CREATE TABLE IF NOT EXISTS genres (
 CREATE TABLE IF NOT EXISTS genre_books (
   id SERIAL PRIMARY KEY,
   genre_id INTEGER REFERENCES genres(genre_id),
-  book_id TEXT REFERENCES books(book_id)
+  book_id INTEGER REFERENCES books(book_id)
 );
 `;
 
@@ -92,32 +91,32 @@ CREATE TABLE IF NOT EXISTS genre_books (
     console.log("Tables created successfully or already exists");
 
     
-     // Check and seed users
+     // Check and seed data
      if (!(await checkIfTableHasData('users'))) {
       await seedUsers(userData);
     }
 
-    // Check and seed books
+   
     if (!(await checkIfTableHasData('books'))) {
       await seedBooks(bookData, userData);
     }
 
-    // Check and seed likes
+    
     if (!(await checkIfTableHasData('likes'))) {
       await seedLikes(likeData, userData, bookData);
     }
 
-    // Check and seed genres
+    
     if (!(await checkIfTableHasData('genres'))) {
       await seedGenres(genreData);
     }
 
-    // Check and seed genre_books
+    
     if (!(await checkIfTableHasData('genre_books'))) {
-      await seedGenreBooks(bookData, userData);
+      await seedGenreBooks(bookData, genreData);
     }
 
-    console.log("Seed Data inserted successfully");
+    console.log("All Seed Data inserted successfully");
 
   } catch (error) {
     console.error("Error creating tables", error);

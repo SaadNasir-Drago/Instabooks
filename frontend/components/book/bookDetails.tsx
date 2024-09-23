@@ -40,6 +40,7 @@ function BookDetails() {
         <h2 className="text-3xl font-bold mb-4">{selectedBook?.title}</h2>
         <h3 className="text-gray-600 mb-2 text-lg">{selectedBook?.author}</h3>
         <p className="text-gray-800 mb-6">{selectedBook?.description}</p>
+        <h3 className="text-gray-600 mb-2 text-lg font-bold">Publisher: {selectedBook?.publisher}</h3>
         <div>
           <Button
             variant="ghost"
@@ -49,7 +50,7 @@ function BookDetails() {
             <ThumbsUpIcon className="w-5 h-5 text-green-500" />
             <span className="sr-only">Like</span>
           </Button>
-          {/* <div className="text-gray-500">{selectedBook.likes}</div> */}
+          <span className="text-gray-500">{selectedBook.likes}</span>
           <Button
             variant="ghost"
             size="icon"
@@ -58,12 +59,12 @@ function BookDetails() {
             <ThumbsDownIcon className="w-5 h-5 text-red-500" />
             <span className="sr-only">Dislike</span>
           </Button>
-          {/* <div className="text-gray-500">{selectedBook.dislikes}</div> */}
+          <span className="text-gray-500">{selectedBook.dislikes}</span>
         </div>
-        <Button variant="outline" className="mr-4">
+        {/* <Button variant="outline" className="mr-4">
           Add to Cart
         </Button>
-        <Button variant="outline">Add to Wishlist</Button>
+        <Button variant="outline">Add to Wishlist</Button> */}
         <Button variant="ghost" onClick={handleBackToHome} className="mt-4">
           Back to Homepage
         </Button>

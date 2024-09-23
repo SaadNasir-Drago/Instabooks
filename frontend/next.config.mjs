@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['i.gr-assets.com', 'placehold.co, placehold.jp' ], // Add the domain here
+    domains: ['i.gr-assets.com', 'placehold.co', 'example.com' ], // Add the domain here
     remotePatterns: [
       {
         protocol: 'https',

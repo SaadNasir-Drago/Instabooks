@@ -57,12 +57,12 @@ export const seedUsers = async (users: User[]) => {
       );
     }
   }
-
+  console.log("User data inserted successfully");
   const useridResult = await query("SELECT MAX(user_id) FROM users");
   const maxUserId = useridResult.rows[0].max;
 
   // Reset the sequence to start after the highest user_id
   await query(`ALTER SEQUENCE users_user_id_seq RESTART WITH ${maxUserId + 1}`);
   console.log(`User ID sequence reset to start from ${maxUserId + 1}`);
-  console.log("User data inserted successfully");
+  
 };

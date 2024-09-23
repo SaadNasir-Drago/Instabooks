@@ -13,12 +13,9 @@ export default function AddBook() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [bookData, setBookData] = useState({
-    book_id: "",
     title: "",
-    rating: 0,
     pages: 0,
     publishDate: "",
-    numRatings: 0,
     coverImg: "",
     price: 0,
     author: "",
@@ -42,18 +39,18 @@ export default function AddBook() {
 
     // Retrieve the token from cookies
     const token = Cookies.get("token");
-    console.log(document.cookie);
+
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4000/createBook", {
+      const response = await fetch("http://localhost:4000/books/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(bookData),
-        credentials: "include"
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -86,18 +83,7 @@ export default function AddBook() {
       <div className="p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
         <h1 className="mb-6 text-3xl font-bold text-center">Add New Book</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="book_id">Book ID</Label>
-              <Input
-                id="book_id"
-                name="book_id"
-                type="text"
-                value={bookData.book_id}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <Label htmlFor="title">Title</Label>
               <Input
@@ -112,21 +98,18 @@ export default function AddBook() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="rating">Rating</Label>
+              <Label htmlFor="author">Author</Label>
               <Input
-                id="rating"
-                name="rating"
-                type="number"
-                step="0.1"
-                min="0"
-                max="5"
-                value={bookData.rating}
+                id="author"
+                name="author"
+                type="text"
+                value={bookData.author}
                 onChange={handleChange}
                 required
               />
             </div>
             <div>
-              <Label htmlFor="pages">Pages</Label>
+              <Label htmlFor="pages">Number of Pages</Label>
               <Input
                 id="pages"
                 name="pages"
@@ -151,13 +134,14 @@ export default function AddBook() {
               />
             </div>
             <div>
-              <Label htmlFor="numRatings">Number of Ratings</Label>
+              <Label htmlFor="price">Price</Label>
               <Input
-                id="numRatings"
-                name="numRatings"
+                id="price"
+                name="price"
                 type="number"
+                step="0.01"
                 min="0"
-                value={bookData.numRatings}
+                value={bookData.price}
                 onChange={handleChange}
                 required
               />
@@ -174,32 +158,7 @@ export default function AddBook() {
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={bookData.price}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="author">Author</Label>
-              <Input
-                id="author"
-                name="author"
-                type="text"
-                value={bookData.author}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
+          {/* <div className="grid grid-cols-2 gap-4"></div> */}
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea

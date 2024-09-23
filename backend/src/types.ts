@@ -12,6 +12,8 @@ export type Book = {
   coverImg: string | null;
   publisher: string | null;
   price: number | null;
+  likes?: number;
+  dislikes?: number;
   created_at?: Date;
   user_id?: number; 
 };
@@ -28,7 +30,7 @@ export type GenreBook = {
 };
 
 export type Like = {
-  like_id: number;
+  like_id?: number;
   liked: boolean;
   user_id?: number; // Foreign key to User
   book_id?: number; // Foreign key to Book
