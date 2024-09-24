@@ -105,3 +105,21 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
 }
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+  }
+  25% {
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+  }
+  75% {
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+  }
+}

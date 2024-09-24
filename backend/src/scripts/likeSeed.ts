@@ -41,6 +41,16 @@ async function getRandomBookIdFromDatabase(): Promise<string> {
   }
 }
 
+function getRandomNumber(min: number, max: number): number {
+  // Ensure the min is less than or equal to max
+  if (min > max) {
+      throw new Error("Minimum value must be less than or equal to maximum value.");
+  }
+  
+  // Generate a random number between min and max
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // Function to validate and clean Like data
 const cleanLikeData = (like: Like): Like => {
   return {
@@ -71,33 +81,6 @@ export const cleanBooksArray = (books: jsonBook[]) => {
     }));
 };
 
-const getRandomUserId = (users: User[]): number => {
-  if (users.length === 0) {
-    throw new Error("No users available");
-  }
-
-  let randomId: number | undefined;
-  do {
-    const randomIndex = Math.floor(Math.random() * users.length);
-    randomId = users[randomIndex].user_id;
-  } while (randomId === null || randomId === undefined);
-
-  return randomId;
-};
-
-export const getRandomBookId = (books: Book[]): string => {
-  if (books.length === 0) {
-    throw new Error("No books available");
-  }
-
-  let randomId: string | undefined;
-  do {
-    const randomIndex = Math.floor(Math.random() * books.length);
-    randomId = books[randomIndex].book_id;
-  } while (randomId === null || randomId === undefined);
-
-  return randomId;
-};
 
 // Function to insert like data into PostgreSQL
 export const seedLikes = async (
@@ -109,7 +92,7 @@ export const seedLikes = async (
 
   for (const likeData of likes) {
     const cleanedLike = cleanLikeData(likeData);
-
+    
     try {
       const queryText = `
         INSERT INTO likes (
@@ -119,13 +102,16 @@ export const seedLikes = async (
         )
         ON CONFLICT (like_id) DO NOTHING;
       `;
-
+      
+      const user_id = getRandomNumber(1, users.length);
+      const book_id = getRandomNumber(1, 1189650);
       const values = [
         cleanedLike.liked,
-        // getRandomUserId(users),
-        await getRandomUserIdFromDatabase(),
-        await getRandomBookIdFromDatabase()
-        // getRandomBookId(booksArray),
+        user_id,
+        book_id
+        // await getRandomUserIdFromDatabase(),
+        // await getRandomBookIdFromDatabase()
+       
       ];
 
       await query(queryText, values);
@@ -141,7 +127,6 @@ export const seedLikes = async (
   const likeidResult = await query("SELECT MAX(like_id) FROM likes");
   const maxlikeId = likeidResult.rows[0].max;
 
-  // Reset the sequence to start after the highest user_id
   await query(`ALTER SEQUENCE likes_like_id_seq RESTART WITH ${maxlikeId + 1}`);
   console.log(`Like ID sequence reset to start from ${maxlikeId + 1}`);
 };

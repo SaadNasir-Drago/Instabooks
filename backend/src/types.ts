@@ -1,17 +1,16 @@
 //create a separate folder for types if in surpasses more than 5 entries
 
 export type Book = {
-  book_id: string;
-  title: string | null;
+  book_id: number;
+  bookId: string;
+  title: string ;
   author: string | null;
   description: string | null;
-  rating: number | null;
   pages: number | null;
-  publishDate: Date | null;
-  numRatings: number | null;
-  coverImg: string | null;
+  publish_date: string | null;
+  cover_img: string ;
   publisher: string | null;
-  price: number | null;
+  genres?: string[] | null;
   likes?: number;
   dislikes?: number;
   created_at?: Date;

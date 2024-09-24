@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useSearch } from "@/context/searchContext";
 import { useSort } from "@/context/sortContext";
 import { User, ChevronDown } from "lucide-react";
-// highlight-next-line
+
 import Image from "next/image";
 
 function Navigation() {
@@ -39,7 +39,7 @@ function Navigation() {
 
   return (
     <div className="flex justify-between flex-wrap items-center mb-6 p-4">
-      {/* highlight-start */}
+      
       <Link href="/">
         <Image
           src="/instabooks-high-resolution-logo-transparent.svg"
@@ -49,7 +49,7 @@ function Navigation() {
           className="cursor-pointer"
         />
       </Link>
-      {/* highlight-end */}
+      
       <div className="flex items-center gap-4">
         <Input
           placeholder="Search books..."
@@ -78,7 +78,7 @@ function Navigation() {
           </DropdownMenuContent>
         </DropdownMenu>
         <Link href="/createUser">
-          <Button variant="default" className="bg-blue-700">
+          <Button variant="default" className="bg-blue-600">
             Register
           </Button>
         </Link>
@@ -86,7 +86,7 @@ function Navigation() {
         {isLoggedIn ? (
           <>
             <Link href="/addBook">
-              <Button variant="default" className="bg-orange-600">
+              <Button variant="default" className="bg-purple-600">
                 Add Book
               </Button>
             </Link>

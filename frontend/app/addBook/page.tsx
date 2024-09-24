@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AddBook() {
   const router = useRouter();
@@ -17,12 +18,34 @@ export default function AddBook() {
     pages: 0,
     publishDate: "",
     coverImg: "",
-    price: 0,
     author: "",
     description: "",
     publisher: "",
+    genres: [] as string[],
     user_id: "", // This should be set to the current user's ID in a real application
   });
+
+  const genres = [
+    "Drama",
+    "Horror",
+    "Thriller",
+    "Comedy",
+    "Action",
+    "Animation",
+    "Crime",
+    "Romance",
+    "Fantasy",
+    "Sci-Fi",
+    "Documentary",
+    "Mystery",
+    "Musical",
+    "Children",
+    "IMAX",
+    "Adventure",
+    "Western",
+    "War",
+    "Film-Noir"
+  ];
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -34,16 +57,26 @@ export default function AddBook() {
     }));
   };
 
+  const handleGenreChange = (genre: string) => {
+    setBookData((prev) => {
+      const updatedGenres = prev.genres.includes(genre)
+        ? prev.genres.filter((g) => g !== genre)
+        : [...prev.genres, genre];
+      return { ...prev, genres: updatedGenres };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Retrieve the token from cookies
-    const token = Cookies.get("token");
-
+    // const token = Cookies.get("token");
+    const token = localStorage.getItem("token");
+    console.log(token);
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4000/books/create", {
+      const response = await fetch("http://localhost:4000/addbook", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,31 +154,16 @@ export default function AddBook() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="publishDate">Publish Date</Label>
-              <Input
-                id="publishDate"
-                name="publishDate"
-                type="date"
-                value={bookData.publishDate}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={bookData.price}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div>
+            <Label htmlFor="publishDate">Publish Date</Label>
+            <Input
+              id="publishDate"
+              name="publishDate"
+              type="date"
+              value={bookData.publishDate}
+              onChange={handleChange}
+              required
+            />
           </div>
           <div>
             <Label htmlFor="coverImg">Cover Image URL</Label>
@@ -158,7 +176,26 @@ export default function AddBook() {
               required
             />
           </div>
-          {/* <div className="grid grid-cols-2 gap-4"></div> */}
+          <div>
+            <Label>Genres</Label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {genres.map((genre) => (
+                <div key={genre} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={genre}
+                    checked={bookData.genres.includes(genre)}
+                    onCheckedChange={() => handleGenreChange(genre)}
+                  />
+                  <label
+                    htmlFor={genre}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {genre}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea

@@ -1,11 +1,15 @@
 "use client";
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Navigation from "@/components/book/navigation";
 import { SortProvider } from "@/context/sortContext";
 import { SearchProvider } from "@/context/searchContext";
 import { GenreProvider } from "@/context/genreContext";
+import {
+  BookProvider,
+  SelectedBookProvider,
+} from "@/context/bookContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "../public/fonts/GeistVF.woff",
@@ -36,8 +40,9 @@ export default function RootLayout({
         <SortProvider>
           <SearchProvider>
             <GenreProvider>
-              
-              {children}
+              <BookProvider>
+                <SelectedBookProvider>{children}<Toaster/></SelectedBookProvider>
+              </BookProvider>
             </GenreProvider>
           </SearchProvider>
         </SortProvider>

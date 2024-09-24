@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from "react";
 import { Genre } from "../../../backend/src/types";
 import { useGenre } from "@/context/genreContext";
@@ -15,9 +16,6 @@ function GenreList() {
         console.log(data);
         // Set genres state to include the "All" genre along with fetched genres
         setGenres([{ genre_id: 0, genre_name: "All" }, ...data]);
-
-        // Set the default selected genre to "All"
-        setSelectedGenre({ genre_id: 0, genre_name: "All" });
         
       } else {
         console.error("Failed to fetch genres");

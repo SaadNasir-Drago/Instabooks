@@ -4,7 +4,8 @@ import { seedUsers } from "./scripts/userSeed";
 import { seedGenres } from "./scripts/genreSeed";
 import { seedLikes } from "./scripts/likeSeed";
 import { seedGenreBooks } from "./scripts/genreBookSeed";
-
+import fs from 'fs';
+import { duplicateDatasetToMillionEntries } from "./scripts/oneMillion";
 const bookData = require("./data/books.json");
 const userData = require("./data/user.json");
 const genreData = require("./data/Genre.json");
@@ -45,16 +46,12 @@ const createTableIfNotExists = async () => {
   title TEXT,
   author TEXT,
   description TEXT,
-  rating VARCHAR(10),
   pages INTEGER NOT NULL,
   publish_date VARCHAR(100),
-  num_ratings INTEGER ,
   cover_img TEXT,
   publisher VARCHAR(255),
-  price DECIMAL(10, 2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   user_id INTEGER REFERENCES users(user_id)
-  -- user_id INTEGER
   ); 
   `;
 
@@ -98,7 +95,7 @@ CREATE TABLE IF NOT EXISTS genre_books (
 
    
     if (!(await checkIfTableHasData('books'))) {
-      await seedBooks(bookData, userData);
+      await seedBooks(duplicateDatasetToMillionEntries(bookData, 1200000), userData);
     }
 
     
@@ -122,5 +119,6 @@ CREATE TABLE IF NOT EXISTS genre_books (
     console.error("Error creating tables", error);
   }
 };
+
 
 createTableIfNotExists();

@@ -14,12 +14,12 @@ export const cleanBooksArray = (books: jsonBook[]) => {
     .map((book) => ({
       bookId: book.bookId,
       title: isAscii(book.title) && book.title?.length ? book.title?.trim() : null,
-      rating: book.rating ? parseFloat(book.rating) : null,
+      // rating: book.rating ? parseFloat(book.rating) : null,
       pages: parseInt(book.pages) || 0,
-      publishDate: new Date(book.publishDate) || null,
-      numRatings: parseInt(book.numRatings) || null,
-      coverImg: book.coverImg || null,
-      price: parseFloat(book.price?.trim()) || null, // Remove any extra spaces or line breaks
+      publish_date: book.publishDate || null,
+      // numRatings: parseInt(book.numRatings) || null,
+      cover_img: book.coverImg || null,
+      // price: parseFloat(book.price?.trim()) || null, // Remove any extra spaces or line breaks
       author: isAscii(book.author) && book.author?.length ? book.author?.trim() : null, // Remove any extra spaces or line breaks
       description: isAscii(book.description) ? book.description?.trim() : null, // Remove any extra spaces or line breaks
       publisher: isAscii(book.publisher) ? book.publisher?.trim() : null, // Remove any extra spaces or line breaks
@@ -41,21 +41,21 @@ export const seedBooks = async (books: jsonBook[], user: User[]) => {
     try {
       const queryText = `
         INSERT INTO books (
-          bookId, title, rating, pages, publish_date, num_ratings, cover_img, price, author, description, publisher, user_id
+          bookId, title, pages, publish_date, cover_img, author, description, publisher, user_id
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+          $1, $2, $3, $4, $5, $6, $7, $8, $9
         )
       `;
 
       const values = [
         cleanedBook.bookId,
         cleanedBook.title,
-        cleanedBook.rating,
+        // cleanedBook.rating,
         cleanedBook.pages,
-        cleanedBook.publishDate,
-        cleanedBook.numRatings,
-        cleanedBook.coverImg,
-        cleanedBook.price,
+        cleanedBook.publish_date,
+        // cleanedBook.numRatings,
+         cleanedBook.cover_img,
+        // cleanedBook.price,
         cleanedBook.author,
         cleanedBook.description,
         cleanedBook.publisher,
@@ -70,4 +70,11 @@ export const seedBooks = async (books: jsonBook[], user: User[]) => {
     }
   }
   console.log("Book Data inserted successfully");
+  
+  // Reset the sequence to start after the seeded highest book_id
+  const bookidresult = await query("SELECT MAX(book_id) FROM books");
+  const maxbookid = bookidresult.rows[0].max;
+
+  await query(`ALTER SEQUENCE likes_like_id_seq RESTART WITH ${maxbookid + 1}`);
+  console.log(`Book ID sequence reset to start from ${maxbookid + 1}`);
 };

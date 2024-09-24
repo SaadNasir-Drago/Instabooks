@@ -34,6 +34,6 @@ export const cookieJwtAuth = (req: Request, res: Response, next: NextFunction) =
   } catch (error) {
     // Handle invalid token: clear the token cookie and redirect to the homepage
     res.clearCookie('token');
-    return res.status(400).send('Invalid token.');
+    return res.status(403).send('token expired');
   }
 };

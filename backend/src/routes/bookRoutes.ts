@@ -5,7 +5,7 @@ import { cookieJwtAuth } from "../middlewares/cookieJwtAuth";
 
 router.get('/books', bookController.getBooks);
 router.get('/books/:id', bookController.getBookById);
-router.post('/books/create', cookieJwtAuth, bookController.createBook);
+router.post('/addbook', cookieJwtAuth, bookController.createBook);
 router.put('/books/:id', bookController.updateBook);
 router.delete('/books/:id', bookController.deleteBook);
 
