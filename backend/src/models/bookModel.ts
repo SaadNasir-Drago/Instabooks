@@ -9,7 +9,7 @@ export const getBooks = async (
   genreId: number | null
 ) => {
   try {
-    // Input validation
+  
     if (limit <= 0 || offset < 0) {
       throw new Error("Invalid limit or offset");
     }
@@ -22,7 +22,7 @@ export const getBooks = async (
       throw new Error("Invalid sort parameter");
     }
 
-    // Determine the order clause based on sort value
+   
     let orderByClause;
     if (sort === "trending") {
       orderByClause = "ORDER BY COALESCE(l.likes_count, 0) DESC";
@@ -30,7 +30,7 @@ export const getBooks = async (
       orderByClause =
         "ORDER BY b.created_at DESC, COALESCE(l.likes_count, 0) DESC";
     } else {
-      orderByClause = "ORDER BY b.book_id"; // Default order
+      orderByClause = "ORDER BY b.book_id"; 
     }
 
     const genreFilter = genreId ? "AND gb.genre_id = $4" : "";
@@ -65,9 +65,7 @@ export const getBooks = async (
       queryParams
     );
 
-    // Query to get the total count of books
-
-    //count books genre filter
+    
     const genreFilter2 = genreId ? "AND gb.genre_id = $2" : "";
     const countResult = await query(
       `
@@ -89,13 +87,14 @@ export const getBooks = async (
 };
 
 //the placeholder $1 prevents sql injection attacks
-export const getBookById = async (id: number): Promise<Book[] | null> => {
+export const getBookById = async (id: number): Promise<Book | null> => {
   const result = await query("SELECT * FROM books WHERE id = $1", [id]);
   return result.rows[0] || null;
 };
 
 export const createBook = async (book: any): Promise<void> => {
   try {
+    console.log(book)
     const queryText1 = `
     INSERT INTO books (
       title, pages, publish_date,  cover_img, author, description, publisher, user_id
@@ -109,7 +108,7 @@ export const createBook = async (book: any): Promise<void> => {
       book.title,
       book.pages,
       book.publishDate,
-      book.coverImg,
+      book.cover_img,
       book.author,
       book.description,
       book.publisher,
@@ -118,17 +117,19 @@ export const createBook = async (book: any): Promise<void> => {
 
     await query(queryText1, values1);
 
-    //input into genre_books
+    // Parse genres if they are coming in as a JSON string
+    let parsedGenres = typeof book.genres === 'string' ? JSON.parse(book.genres) : book.genres;
+    
+    for (let genre_name of parsedGenres) {
 
-    for (let genre_name of book.genres) {
       const book_id_result = await query(
         `SELECT book_id from books ORDER BY book_id DESC LIMIT 1`
       );
-      // console.log(genre_name);
+      
       const genre_id_result = await query(
         `SELECT genre_id from genres WHERE genre_name = '${genre_name}'`
       );
-      // console.log(genre_id_result.rows[0].genre_id);
+      
       const queryText2 = `
       INSERT INTO genre_books (
         book_id, genre_id
@@ -147,10 +148,10 @@ export const createBook = async (book: any): Promise<void> => {
   }
 };
 
-export const updateBook = async (id: number, book: Book): Promise<void> => {
+export const updateBook = async (id: number, book: Partial<Book>): Promise<void> => {
   await query(
     "UPDATE books SET title = $1, author = $2, published_date = $3, genre = $4 WHERE id = $5"
-    // [book.title, book.author, book.publishDate, book.genre, id]
+    
   );
 };
 
@@ -162,14 +163,14 @@ export const likeDislikeBook = async (
   likeDislike: Like
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    // Check if the user has already liked the book
+    
     const existingLike = await query(
       `SELECT * FROM likes WHERE user_id = $1 AND book_id = $2 AND liked = true`,
       [likeDislike.user_id, likeDislike.book_id]
     );
 
     if (existingLike.rows.length > 0) {
-      // If a like exists, return a failure response
+    
       await query(
         `UPDATE likes SET liked = null WHERE user_id = $! AND book_id = $2`,
         [likeDislike.user_id, likeDislike.book_id]
@@ -184,7 +185,7 @@ export const likeDislikeBook = async (
 
     if (existingDislike.rows.length > 0) {
       await query(
-        `UPDATE likes SET liked = false WHERE user_id = $! AND book_id = $2`,
+        `UPDATE likes SET liked = false WHERE user_id = $1 AND book_id = $2`,
         [likeDislike.user_id, likeDislike.book_id]
       );
       return { success: false, message: "You have already disliked this book" };

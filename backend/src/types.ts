@@ -8,7 +8,7 @@ export type Book = {
   description: string | null;
   pages: number | null;
   publish_date: string | null;
-  cover_img: string ;
+  cover_img: string | Blob ;
   publisher: string | null;
   genres?: string[] | null;
   likes?: number;

@@ -1,11 +1,36 @@
 import { Request, Response } from "express";
 import * as bookModel from "../models/bookModel";
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+// Set up multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join('./src/uploads');
+    // Create the uploads directory if it doesn't exist
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath); // Folder to save uploaded files
+  },
+  filename: (req, file, cb) => {
+    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `${file.originalname}`); // Naming the uploaded file
+  },
+});
+
+// Initialize multer with the storage settings
+const upload = multer({ storage });
+
+// Middleware for uploading a single image file
+export const uploadSingle = upload.single('cover_img');
 
 export const getBooks = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 16;
   const search = (req.query.search as string) || "";
-  console.log("ctrl called", search);
+  
   const offset = (page - 1) * limit;
   const sort = req.query.sort as string;
   const genre = parseInt(req.query.genre as string);
@@ -19,7 +44,6 @@ export const getBooks = async (req: Request, res: Response) => {
       genre
     );
 
-    // Calculate total pages
     const totalPages = Math.ceil(allbooks.totalBooks / limit);
 
     res.json({
@@ -47,9 +71,16 @@ export const getBookById = async (req: Request, res: Response) => {
 
 export const createBook = async (req: Request, res: Response) => {
   try {
-    // console.log(req.body)
+    console.log(req.body)
+    const imageFile = req.file; // Get the uploaded file from multer
+
+    // If an image was uploaded, store its filename in bookData
+    if (imageFile) {
+      req.body.cover_img = imageFile.filename; // Save the image filename to bookData
+    }
+
     await bookModel.createBook(req.body);
-    res.status(201).send("Book added successfully");
+    res.status(201).json({message: "Book added successfully"});
   } catch (error) {
     res.status(500).send("Error adding books");
   }

@@ -22,10 +22,21 @@ function Navigation() {
   const { searchTerm, setSearchTerm } = useSearch();
   const { sortBy, setSortBy } = useSort();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState(searchTerm); // Local state for input value
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem("token"));
   }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchTerm(inputValue); // Update searchTerm after debounce delay
+    }, 1700); // Adjust debounce delay (300ms) as needed
+
+    return () => {
+      clearTimeout(handler); // Cleanup timeout on component unmount or input change
+    };
+  }, [inputValue, setSearchTerm]); // Effect runs when inputValue changes
 
   const handleLogin = () => {
     router.push("/login");
@@ -53,8 +64,8 @@ function Navigation() {
       <div className="flex items-center gap-4">
         <Input
           placeholder="Search books..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           className="w-64"
         />
         <DropdownMenu>

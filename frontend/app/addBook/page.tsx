@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import Cookies from "js-cookie";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useDropzone } from 'react-dropzone';
+import Image from 'next/image';
 
 export default function AddBook() {
   const router = useRouter();
@@ -17,34 +18,19 @@ export default function AddBook() {
     title: "",
     pages: 0,
     publishDate: "",
-    coverImg: "",
+    cover_img: "",
     author: "",
     description: "",
     publisher: "",
-    genres: [] as string[],
-    user_id: "", // This should be set to the current user's ID in a real application
+    genres: [] as string[]
   });
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const genres = [
-    "Drama",
-    "Horror",
-    "Thriller",
-    "Comedy",
-    "Action",
-    "Animation",
-    "Crime",
-    "Romance",
-    "Fantasy",
-    "Sci-Fi",
-    "Documentary",
-    "Mystery",
-    "Musical",
-    "Children",
-    "IMAX",
-    "Adventure",
-    "Western",
-    "War",
-    "Film-Noir"
+    "Drama", "Horror", "Thriller", "Comedy", "Action", "Animation", "Crime",
+    "Romance", "Fantasy", "Sci-Fi", "Documentary", "Mystery", "Musical",
+    "Children", "IMAX", "Adventure", "Western", "War", "Film-Noir",
   ];
 
   const handleChange = (
@@ -66,27 +52,59 @@ export default function AddBook() {
     });
   };
 
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      setUploadedImage(file);
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+      setBookData((prev) => ({
+        ...prev,
+        cover_img: file.name, // Store the filename, not the object URL
+      }));
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
+    },
+    multiple: false
+  });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Retrieve the token from cookies
-    // const token = Cookies.get("token");
     const token = localStorage.getItem("token");
-    console.log(token);
     setIsLoading(true);
 
     try {
+      const formData = new FormData();
+      Object.entries(bookData).forEach(([key, value]) => {
+        if (key === 'genres') {
+          formData.append(key, JSON.stringify(value));
+        } else if (key === 'pages') {
+          formData.append(key, value.toString());
+        } else {
+          formData.append(key, value as string);
+        }
+      });
+
+      if (uploadedImage) {
+        formData.append('cover_img', uploadedImage);
+      }
+      console.log(formData);
       const response = await fetch("http://localhost:4000/addbook", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(bookData),
-        credentials: "include",
+        body: formData,
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log("Server response:", result);
         toast({
           title: "Success",
           description: "Book added successfully",
@@ -94,6 +112,7 @@ export default function AddBook() {
         router.push("/"); // Redirect to books list page
       } else {
         const errorData = await response.json();
+        console.error("Server error:", errorData);
         throw new Error(errorData.message || "Failed to add book");
       }
     } catch (error) {
@@ -166,16 +185,34 @@ export default function AddBook() {
             />
           </div>
           <div>
-            <Label htmlFor="coverImg">Cover Image URL</Label>
-            <Input
-              id="coverImg"
-              name="coverImg"
-              type="url"
-              value={bookData.coverImg}
-              onChange={handleChange}
-              required
-            />
+            <Label>Upload Cover Image</Label>
+            <div
+              {...getRootProps()}
+              className={`mt-2 border-2 border-dashed rounded-md p-4 text-center cursor-pointer ${
+                isDragActive ? "border-primary" : "border-gray-300"
+              }`}
+            >
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p>Drop the image here ...</p>
+              ) : (
+                <p>Drag 'n' drop an image here, or click to select one</p>
+              )}
+            </div>
           </div>
+          {previewUrl && (
+            <div className="mt-4">
+              <Label>Preview</Label>
+              <div className="mt-2 relative h-48 w-full">
+                <Image
+                  src={previewUrl}
+                  alt="Cover preview"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+            </div>
+          )}
           <div>
             <Label>Genres</Label>
             <div className="grid grid-cols-3 gap-2 mt-2">
