@@ -3,9 +3,11 @@ const router = Router();
 import * as bookController from '../controllers/bookController'
 import { cookieJwtAuth } from "../middlewares/cookieJwtAuth";
 import * as elasticController from '../controllers/elasticController'
+import { uploadSingle } from "../middlewares/localImageUpload";
+
 router.get('/books', bookController.getBooks);
 router.get('/books/:id', bookController.getBookById);
-router.post('/addbook', bookController.uploadSingle, cookieJwtAuth,  bookController.createBook);
+router.post('/addbook', uploadSingle, cookieJwtAuth,  bookController.createBook);
 router.put('/books/:id', bookController.updateBook);
 router.delete('/books/:id', bookController.deleteBook);
 

@@ -16,7 +16,7 @@ server.use(cookieParser()) //middleware for parsing cookies
 server.use(cors(corsOptions)); //cors middleware
 server.use(bodyParser.json()) //middleware for parsing JSON
 server.use(bodyParser.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
-server.use('/uploads', express.static('./src/uploads')); //Middleware to serve static files
+server.use('/uploads', express.static('src/uploads')); //Middleware to serve static files
 
 // Test Elasticsearch connection
 // elasticClient.ping()

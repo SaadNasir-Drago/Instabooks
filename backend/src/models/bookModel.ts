@@ -172,7 +172,7 @@ export const likeDislikeBook = async (
     if (existingLike.rows.length > 0) {
     
       await query(
-        `UPDATE likes SET liked = null WHERE user_id = $! AND book_id = $2`,
+        `UPDATE likes SET liked = null WHERE user_id = $1 AND book_id = $2`,
         [likeDislike.user_id, likeDislike.book_id]
       );
       return { success: false, message: "You have already liked this book" };

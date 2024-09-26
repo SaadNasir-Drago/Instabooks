@@ -21,7 +21,7 @@ export const verifyUser = async (req: Request, res: Response) => {
     delete userData.password;
 
     const token = jwt.sign(userData, process.env.SECRET as string, {
-      expiresIn: "1h",
+      expiresIn: "3h",
     });
 
     res.cookie("token", token, {

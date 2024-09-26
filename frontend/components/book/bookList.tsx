@@ -12,7 +12,6 @@ import { useGenre } from "@/context/genreContext";
 import { Genre } from "../../../backend/src/types";
 import { useToast } from "@/hooks/use-toast";
 import { ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
-// import { BookOpenIcon } from '@heroicons/react/solid';
 import { BookOpenIcon } from "@heroicons/react/24/solid";
 
 export default function BookList() {
@@ -279,7 +278,7 @@ export default function BookList() {
                       {book.title}
                     </h2>
                     <p className="text-gray-500 mb-2">{book.author}</p>
-                    <p className="text-gray-600 line-clamp-4">
+                    <p className="text-gray-600 line-clamp-6">
                       {book.description}
                     </p>
                   </CardContent>
