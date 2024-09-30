@@ -5,11 +5,9 @@ import "./globals.css";
 import { SortProvider } from "@/context/sortContext";
 import { SearchProvider } from "@/context/searchContext";
 import { GenreProvider } from "@/context/genreContext";
-import {
-  BookProvider,
-  SelectedBookProvider,
-} from "@/context/bookContext";
+import { BookProvider, SelectedBookProvider } from "@/context/bookContext";
 import { Toaster } from "@/components/ui/toaster";
+import { UserLikesProvider } from "@/context/userLikeContext";
 
 const geistSans = localFont({
   src: "../public/fonts/GeistVF.woff",
@@ -41,7 +39,10 @@ export default function RootLayout({
           <SearchProvider>
             <GenreProvider>
               <BookProvider>
-                <SelectedBookProvider>{children}<Toaster/></SelectedBookProvider>
+                <SelectedBookProvider>
+                  {children}
+                  <Toaster />
+                </SelectedBookProvider>
               </BookProvider>
             </GenreProvider>
           </SearchProvider>

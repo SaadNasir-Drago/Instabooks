@@ -2,13 +2,13 @@
 
 export type Book = {
   book_id: number;
-  bookId: string;
+  bookId?: string;
   title: string ;
   author: string | null;
   description: string | null;
   pages: number | null;
   publish_date: string | null;
-  cover_img: string | Blob ;
+  cover_img: string ;
   publisher: string | null;
   genres?: string[] | null;
   likes?: number;

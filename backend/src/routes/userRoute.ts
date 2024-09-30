@@ -3,9 +3,9 @@ const router = Router();
 import * as userController from '../controllers/userController'
 import { cookieJwtAuth } from "../middlewares/cookieJwtAuth";
 
-// router.get('/user/:id', bookController.getBookById);
 router.post('/createUser', userController.createUser);
-// router.put('/books/:id', bookController.updateBook);
-// router.delete('/books/:id', cookieJwtAuth, bookController.deleteBook);
+router.get('/profileBooks', cookieJwtAuth, userController.getUserBooks);
+router.get('/profileUser', cookieJwtAuth, userController.getUserById);
+
 
 export default router;

@@ -148,61 +148,75 @@ export const createBook = async (book: any): Promise<void> => {
   }
 };
 
-export const updateBook = async (id: number, book: Partial<Book>): Promise<void> => {
-  await query(
-    "UPDATE books SET title = $1, author = $2, published_date = $3, genre = $4 WHERE id = $5"
-    
-  );
-};
 
-export const deleteBook = async (id: number): Promise<void> => {
-  await query("DELETE FROM books WHERE id = $1", [id]);
-};
-
-export const likeDislikeBook = async (
-  likeDislike: Like
-): Promise<{ success: boolean; message?: string }> => {
+export const updateBook = async (book_id: number, book: Partial<Book>): Promise<void> => {
   try {
-    
-    const existingLike = await query(
-      `SELECT * FROM likes WHERE user_id = $1 AND book_id = $2 AND liked = true`,
-      [likeDislike.user_id, likeDislike.book_id]
-    );
+    console.log(book);
 
-    if (existingLike.rows.length > 0) {
-    
-      await query(
-        `UPDATE likes SET liked = null WHERE user_id = $1 AND book_id = $2`,
-        [likeDislike.user_id, likeDislike.book_id]
-      );
-      return { success: false, message: "You have already liked this book" };
+    // Update the main book details in the books table
+    const queryText1 = `
+      UPDATE books 
+      SET title = $1, pages = $2, publish_date = $3, cover_img = $4, author = $5, description = $6, publisher = $7
+      WHERE book_id = $8
+    `;
+
+    const values1 = [
+      book.title,
+      book.pages,
+      book.publish_date,
+      book.cover_img,
+      book.author,
+      book.description,
+      book.publisher,
+      book_id,
+    ];
+
+    await query(queryText1, values1);
+
+    // Handle genre updates by clearing old entries and inserting new ones
+    if (book.genres) {
+      // Parse genres if they are coming in as a JSON string
+      let parsedGenres = typeof book.genres === 'string' ? JSON.parse(book.genres) : book.genres;
+
+      // First, delete all existing genre associations for the book
+      await query(`DELETE FROM genre_books WHERE book_id = $1`, [book_id]);
+
+      // Insert the updated genres
+      for (let genre_name of parsedGenres) {
+        const genre_id_result = await query(
+          `SELECT genre_id FROM genres WHERE genre_name = $1`, [genre_name]
+        );
+
+        if (genre_id_result.rows.length > 0) {
+          const genre_id = genre_id_result.rows[0].genre_id;
+          const queryText2 = `
+            INSERT INTO genre_books (book_id, genre_id) 
+            VALUES ($1, $2)
+          `;
+          await query(queryText2, [book_id, genre_id]);
+        } else {
+          console.error(`Genre not found: ${genre_name}`);
+        }
+      }
     }
 
-    const existingDislike = await query(
-      `SELECT * FROM likes WHERE user_id = $1 AND book_id = $2 AND liked = false`,
-      [likeDislike.user_id, likeDislike.book_id]
-    );
-
-    if (existingDislike.rows.length > 0) {
-      await query(
-        `UPDATE likes SET liked = false WHERE user_id = $1 AND book_id = $2`,
-        [likeDislike.user_id, likeDislike.book_id]
-      );
-      return { success: false, message: "You have already disliked this book" };
-    }
-
-    // If no existing like, proceed to insert the new like
-    await query(
-      `INSERT INTO likes (user_id, book_id, liked) VALUES ($1, $2, $3)`,
-      [likeDislike.user_id, likeDislike.book_id, likeDislike.liked]
-    );
-
-    return { success: true }; // Success
   } catch (error) {
-    console.error("Error in likeDislikeBook:", error);
-    throw error;
+    console.error("Error updating book:", error);
+    throw error; // Re-throw the error for the caller to handle
   }
 };
+
+export const deleteBook = async (book_id: number): Promise<void> => {
+  try {
+    await query("DELETE FROM likes WHERE book_id = $1", [book_id]);
+    await query("DELETE FROM genre_books WHERE book_id = $1", [book_id]);
+    await query("DELETE FROM books WHERE book_id = $1", [book_id]);
+  } catch (error) {
+    console.log(error)
+  }
+ 
+};
+
 
 export const getGenres = async (): Promise<Genre[] | null> => {
   try {
@@ -211,5 +225,64 @@ export const getGenres = async (): Promise<Genre[] | null> => {
   } catch (error) {
     console.error("Error fetching genres:", error);
     return null; // or throw an error if you prefer
+  }
+};
+
+
+export const likeDislikeBook = async (
+  likeDislike: Like
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    // First, check the current state in the database
+    const currentState = await query(
+      `SELECT liked FROM likes WHERE user_id = $1 AND book_id = $2`,
+      [likeDislike.user_id, likeDislike.book_id]
+    );
+
+    let updateQuery: string;
+    let queryParams: any[]; // Parameters to be passed to the query
+    let updateMessage: string;
+
+    if (currentState.rows.length === 0) {
+      // No existing record, insert a new one
+      // console.log("Inserting new record");
+      updateQuery = `INSERT INTO likes (user_id, book_id, liked) VALUES ($1, $2, $3)`;
+      queryParams = [likeDislike.user_id, likeDislike.book_id, likeDislike.liked];
+      updateMessage = likeDislike.liked ? "Book liked successfully" : "Book disliked successfully";
+    } else {
+      const currentLiked = currentState.rows[0].liked;
+
+      if (likeDislike.liked) {
+        // User is trying to like
+        console.log("User is trying to like");
+        if (currentLiked === true) {
+          updateQuery = `UPDATE likes SET liked = NULL WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Like removed";
+          queryParams = [likeDislike.user_id, likeDislike.book_id]; // Only 2 parameters
+        } else {
+          updateQuery = `UPDATE likes SET liked = TRUE WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Book liked successfully";
+          queryParams = [likeDislike.user_id, likeDislike.book_id]; // Only 2 parameters
+        }
+      } else {
+        // User is trying to dislike
+        if (currentLiked === false) {
+          updateQuery = `UPDATE likes SET liked = NULL WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Dislike removed";
+          queryParams = [likeDislike.user_id, likeDislike.book_id]; // Only 2 parameters
+        } else {
+          updateQuery = `UPDATE likes SET liked = FALSE WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Book disliked successfully";
+          queryParams = [likeDislike.user_id, likeDislike.book_id]; // Only 2 parameters
+        }
+      }
+    }
+
+    await query(updateQuery, queryParams);
+
+    return { success: true, message: updateMessage };
+  } catch (error) {
+    console.error("Error in likeDislikeBook:", error);
+    throw error;
   }
 };

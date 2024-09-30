@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useDropzone } from 'react-dropzone';
-import Image from 'next/image';
+import { useDropzone } from "react-dropzone";
+import Image from "next/image";
+import { BookOpenIcon } from "@heroicons/react/24/solid";
 
 export default function AddBook() {
   const router = useRouter();
@@ -22,15 +23,31 @@ export default function AddBook() {
     author: "",
     description: "",
     publisher: "",
-    genres: [] as string[]
+    genres: [] as string[],
   });
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const genres = [
-    "Drama", "Horror", "Thriller", "Comedy", "Action", "Animation", "Crime",
-    "Romance", "Fantasy", "Sci-Fi", "Documentary", "Mystery", "Musical",
-    "Children", "IMAX", "Adventure", "Western", "War", "Film-Noir",
+    "Drama",
+    "Horror",
+    "Thriller",
+    "Comedy",
+    "Action",
+    "Animation",
+    "Crime",
+    "Romance",
+    "Fantasy",
+    "Sci-Fi",
+    "Documentary",
+    "Mystery",
+    "Musical",
+    "Children",
+    "IMAX",
+    "Adventure",
+    "Western",
+    "War",
+    "Film-Noir",
   ];
 
   const handleChange = (
@@ -68,9 +85,9 @@ export default function AddBook() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
+      "image/*": [".jpeg", ".jpg", ".png", ".gif"],
     },
-    multiple: false
+    multiple: false,
   });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,9 +98,9 @@ export default function AddBook() {
     try {
       const formData = new FormData();
       Object.entries(bookData).forEach(([key, value]) => {
-        if (key === 'genres') {
+        if (key === "genres") {
           formData.append(key, JSON.stringify(value));
-        } else if (key === 'pages') {
+        } else if (key === "pages") {
           formData.append(key, value.toString());
         } else {
           formData.append(key, value as string);
@@ -91,7 +108,7 @@ export default function AddBook() {
       });
 
       if (uploadedImage) {
-        formData.append('cover_img', uploadedImage);
+        formData.append("cover_img", uploadedImage);
       }
       console.log(formData);
       const response = await fetch("http://localhost:4000/addbook", {
@@ -129,9 +146,24 @@ export default function AddBook() {
       setIsLoading(false);
     }
   };
+  
+  const LoadingSpinner = () => (
+    <div className="flex flex-col justify-center items-center h-64 space-y-4">
+      <div className="relative">
+        {/* <div className="absolute inset-0 rounded-full border-4 border-primary opacity-50 animate-pulse"></div> */}
+        <BookOpenIcon
+          className="relative text-primary animate-bounce"
+          style={{ width: "96px", height: "96px" }}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
       <div className="p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
         <h1 className="mb-6 text-3xl font-bold text-center">Add New Book</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -208,7 +240,7 @@ export default function AddBook() {
                   src={previewUrl}
                   alt="Cover preview"
                   fill
-                  style={{ objectFit: 'contain' }}
+                  style={{ objectFit: "contain" }}
                 />
               </div>
             </div>
@@ -255,7 +287,7 @@ export default function AddBook() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Adding Book..." : "Add Book"}
+            Add Book
           </Button>
         </form>
         <Button
@@ -265,7 +297,7 @@ export default function AddBook() {
         >
           Back to Homepage
         </Button>
-      </div>
+      </div> ) }
     </div>
   );
 }

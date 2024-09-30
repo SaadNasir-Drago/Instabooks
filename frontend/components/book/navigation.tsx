@@ -49,7 +49,7 @@ function Navigation() {
   };
 
   return (
-    <div className="flex justify-between flex-wrap items-center mb-6 p-4">
+    <div className="sticky flex justify-between flex-wrap items-center mb-0 p-4 px-8">
       
       <Link href="/">
         <Image
@@ -58,10 +58,11 @@ function Navigation() {
           width={250}
           height={50}
           className="cursor-pointer"
+          style={{width: 250, height: 50}}
         />
       </Link>
       
-      <div className="flex items-center gap-4">
+      <div className="flex items-center flex-wrap gap-4">
         <Input
           placeholder="Search books..."
           value={inputValue}

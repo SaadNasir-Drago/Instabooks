@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import * as bookModel from "../models/bookModel";
-
-
+// import { esClient } from "../server";
+// import { getBooks as elasticBook } from "../config/elasticSearch";
 export const getBooks = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 16;
@@ -10,8 +10,18 @@ export const getBooks = async (req: Request, res: Response) => {
   const offset = (page - 1) * limit;
   const sort = req.query.sort as string;
   const genre = parseInt(req.query.genre as string);
-
+  
   try {
+    
+
+    // const  {books, totalBooks} = await elasticBook( limit, offset, search, sort, genre);
+
+    // res.json({
+    //   books,
+    //   totalPages,
+    // });
+  
+
     const allbooks = await bookModel.getBooks(
       limit,
       offset,
@@ -26,20 +36,7 @@ export const getBooks = async (req: Request, res: Response) => {
       books: allbooks.books,
       totalPages,
     });
-  } catch (error) {
-    res.status(500).send("Error fetching books");
-  }
-};
-
-export const getBookById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    const book = await bookModel.getBookById(parseInt(id, 10));
-    if (book) {
-      res.json(book);
-    } else {
-      res.status(404).send("Book not found");
-    }
+    
   } catch (error) {
     res.status(500).send("Error fetching books");
   }
@@ -47,7 +44,7 @@ export const getBookById = async (req: Request, res: Response) => {
 
 export const createBook = async (req: Request, res: Response) => {
   try {
-    console.log(req.body)
+  
     const imageFile = req.file; // Get the uploaded file from multer
 
     // If an image was uploaded, store its filename in bookData
@@ -66,7 +63,7 @@ export const updateBook = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     await bookModel.updateBook(parseInt(id, 10), req.body);
-    res.status(200).send("Book updated successfully");
+    res.status(200).json({message: "Book updated successfully"});
   } catch (error) {
     res.status(500).send("Error updating books");
   }
@@ -74,6 +71,7 @@ export const updateBook = async (req: Request, res: Response) => {
 
 export const deleteBook = async (req: Request, res: Response) => {
   const { id } = req.params;
+  
   try {
     await bookModel.deleteBook(parseInt(id, 10));
     res.status(200).send("Book deleted successfully");
@@ -86,14 +84,27 @@ export const likeDislikeBook = async (req: Request, res: Response) => {
   try {
     const result = await bookModel.likeDislikeBook(req.body);
 
-    if (!result.success) {
-      return res.status(400).json({ success: result.success, message: result.message });
+    if (result.success) {
+      // If successful, return 200 OK instead of 201 Created, 
+      // as we're not always creating a new resource
+      res.status(200).json({ 
+        success: result.success, 
+        message: result.message 
+      });
+    } else {
+      // If not successful, it's not necessarily a bad request,
+      // so we'll use 200 OK here as well
+      res.status(200).json({ 
+        success: result.success, 
+        message: result.message 
+      });
     }
-
-    res.status(201).json({ success: result.success, message: "Book liked successfully" });
   } catch (error) {
     console.error("Error in likeDislikeBook controller:", error);
-    res.status(500).send("Error liking the book");
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while processing your request"
+    });
   }
 };
 

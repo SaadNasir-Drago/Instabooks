@@ -1,81 +1,84 @@
-"use client"
+'use client'
 
-import React, { useState, useEffect } from "react"
-import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
-import { Label } from "../../components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../../components/ui/pagination"
+import React, { useState, useEffect, useContext } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import Image from "next/image"
-import { useToast } from "../../hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import Navigation from "@/components/book/navigation"
-
-type Book = {
-  id: string
-  title: string
-  author: string
-  description: string
-  publisher: string
-  cover_image: string
-  liked: boolean
-}
+import { Book, Building, Calendar, User } from "lucide-react"
+import { Book as BookType } from "../../../backend/src/types"
+import Link from "next/link"
+import { SelectedBookContext } from "@/context/bookContext"
 
 type User = {
   id: string
-  name: string
+  first_name: string
+  last_name: string
   email: string
+  password: string
 }
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<User | null>({ id: '',
-    name: '',
-    email: ''})
-  const [books, setBooks] = useState<Book[]>( [
-    {
-      id: 'book1',
-      title: 'The Great Gatsby',
-      author: 'F. Scott Fitzgerald',
-      description: 'A story of love, loss, and the American Dream set in the Jazz Age.',
-      publisher: 'Scribner',
-      cover_image: 'https://example.com/gatsby.jpg',
-      liked: true
-    },
-    {
-      id: 'book2',
-      title: 'To Kill a Mockingbird',
-      author: 'Harper Lee',
-      description: 'A classic novel about racial injustice and the loss of innocence.',
-      publisher: 'HarperCollins',
-      cover_image: 'https://example.com/mockingbird.jpg',
-      liked: false
-    },
-    {
-      id: 'book3',
-      title: '1984',
-      author: 'George Orwell',
-      description: 'A dystopian novel about a totalitarian society and the dangers of censorship.',
-      publisher: 'Harcourt Brace Jovanovich',
-      cover_image: 'https://example.com/1984.jpg',
-      liked: true
-    },
-    // Add more book data here
-  ])
+  const placeholder = "https://placehold.jp/150x150.png"
+
+  const [user, setUser] = useState<User | null>({
+    id: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    password: "",
+  })
+  const [profileBooks, setProfileBooks] = useState<BookType[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [booksPerPage] = useState(5)
   const [displayMode, setDisplayMode] = useState<"all" | "liked">("all")
   const [isLoading, setIsLoading] = useState(true)
+  const [bookToDelete, setBookToDelete] = useState<number | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const { toast } = useToast()
+  const { selectedBook, setSelectedBook } = useContext(SelectedBookContext)
 
   useEffect(() => {
     fetchUserData()
-    fetchBooks()
+    fetchBooksById()
   }, [])
 
   const fetchUserData = async () => {
+    const token = localStorage.getItem("token")
     try {
-      const response = await fetch('/api/user')
-      if (!response.ok) throw new Error('Failed to fetch user data')
+      const response = await fetch("http://localhost:4000/profileUser", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) throw new Error("Failed to fetch user data")
       const userData = await response.json()
       setUser(userData)
     } catch (error) {
@@ -87,13 +90,29 @@ export default function ProfilePage() {
     }
   }
 
-  const fetchBooks = async () => {
+  const fetchBooksById = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/books')
-      if (!response.ok) throw new Error('Failed to fetch books')
+      const token = localStorage.getItem("token")
+      const response = await fetch(`http://localhost:4000/profileBooks`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) throw new Error("Failed to fetch books")
+      else if (response.status === 401) {
+        toast({
+          title: "Error",
+          description: "Unauthorized",
+          variant: "destructive",
+        })
+      }
       const booksData = await response.json()
-      setBooks(booksData)
+      console.log(booksData)
+      setProfileBooks(booksData)
     } catch (error) {
       toast({
         title: "Error",
@@ -107,48 +126,79 @@ export default function ProfilePage() {
 
   const indexOfLastBook = currentPage * booksPerPage
   const indexOfFirstBook = indexOfLastBook - booksPerPage
-  const currentBooks = books.slice(indexOfFirstBook, indexOfLastBook)
-
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
-
-  const handleUpdateBook = async (bookId: string) => {
-    // Implement update logic
-    console.log("Update book", bookId)
-    // After updating, refetch the books
-    await fetchBooks()
+  const currentBooks = profileBooks.slice(indexOfFirstBook, indexOfLastBook)
+  const totalPages = Math.ceil(profileBooks.length / booksPerPage)
+  const paginate = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber)
+    }
+  }
+  const handleUpdateBook = async (book: BookType) => {
+    setSelectedBook(book)
   }
 
-  const handleDeleteBook = async (bookId: string) => {
-    try {
-      const response = await fetch(`/api/books/${bookId}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to delete book')
-      setBooks(books.filter(book => book.id !== bookId))
-      toast({
-        title: "Success",
-        description: "Book deleted successfully.",
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete book. Please try again.",
-        variant: "destructive",
-      })
+  const handleDeleteBook = async (book_id: number) => {
+    setBookToDelete(book_id)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteBook = async () => {
+    if (bookToDelete) {
+      try {
+        const response = await fetch(`http://localhost:4000/book/${bookToDelete}`, {
+          method: "DELETE",
+        })
+        if (!response.ok) {
+          throw new Error("Failed to delete book")
+        }
+        setProfileBooks(profileBooks.filter((book) => book.book_id !== bookToDelete))
+        toast({
+          title: "Success",
+          description: "Book deleted successfully.",
+        })
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete book. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsDeleteDialogOpen(false)
+        setBookToDelete(null)
+      }
     }
   }
 
   const handleDisplayModeChange = (mode: "all" | "liked") => {
     setDisplayMode(mode)
     setCurrentPage(1)
-    fetchBooks() // Refetch books when changing display mode
+    fetchBooksById()
   }
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>
-  if (!user) return <div className="flex justify-center items-center h-screen">User not found</div>
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    )
+  if (!user)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        User not found
+      </div>
+    )
+
+  const getImageSrc = (cover_img: string) => {
+    if (!cover_img) return placeholder
+    if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
+      return cover_img
+    }
+    return `http://localhost:4000/uploads/${cover_img}`
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <Navigation/>
-      {/* <Navigation></Navigation> */}
+    <div className="container mx-auto px-8 py-3">
+      <Navigation />
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>User Profile</CardTitle>
@@ -156,79 +206,126 @@ export default function ProfilePage() {
         <CardContent>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" value={user.name} readOnly />
+              <Label htmlFor="first_name">First Name</Label>
+              <Input id="first_name" value={user.first_name} readOnly />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input id="last_name" value={user.last_name} readOnly />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input id="email" value={user.email} readOnly />
             </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={user.password}
+                readOnly
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="mb-4">
-        <Select onValueChange={(value) => handleDisplayModeChange(value as "all" | "liked")}>
-          <SelectTrigger>
-            <SelectValue placeholder="Display mode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Books</SelectItem>
-            <SelectItem value="liked">Liked Books</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {currentBooks.map(book => (
-        <Card key={book.id} className="mb-4">
-          <CardHeader>
-            <CardTitle>{book.title}</CardTitle>
-          </CardHeader>
+      {currentBooks.map((book) => (
+        <Card key={book.book_id} className="mb-4">
+          <CardHeader></CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="w-full md:w-1/4">
+              <div className="w-full md:w-1/6">
                 <Image
-                  src={book.cover_image}
+                  src={getImageSrc(book.cover_img)}
                   alt={`Cover of ${book.title}`}
                   width={200}
                   height={300}
                   className="object-cover rounded-md"
+                  style={{ width: "200px", height: "300px" }}
                 />
               </div>
-              <div className="w-full md:w-3/4">
-                <p className="font-semibold">Author: {book.author}</p>
-                <p className="font-semibold">Publisher: {book.publisher}</p>
-                <p className="mt-2">{book.description}</p>
+              <div className="md:w-2/3">
+                <h1 className="text-3xl font-bold mb-4">{book.title}</h1>
+                <div className="flex items-center text-gray-600 mb-4 text-xl">
+                  <User className="mr-2 h-5 w-5 text-lg" />
+                  <span>{book.author}</span>
+                </div>
+                <p className="text-gray-700 mb-6 text-base leading-relaxed ">
+                  {book.description}
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-6 ">
+                  <div className="flex items-center">
+                    <Building className="mr-2 h-5 w-5 text-gray-500" />
+                    <span className="text-lg">
+                      Publisher: {book.publisher}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Calendar className="mr-2 h-5 w-5 text-gray-500" />
+                    <span className="text-lg">
+                      Published: {book.publish_date}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Book className="mr-2 h-5 w-5 text-gray-500" />
+                    <span className="text-lg">Pages: {book.pages}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button onClick={() => handleUpdateBook(book.id)}>Update</Button>
-            <Button variant="destructive" onClick={() => handleDeleteBook(book.id)}>Delete</Button>
+            <Link href={'/updateBook'}>
+              <Button onClick={() => handleUpdateBook(book)}>Update</Button>
+            </Link>
+            <Button
+              variant="destructive"
+              onClick={() => handleDeleteBook(book.book_id)}
+            >
+              Delete
+            </Button>
           </CardFooter>
         </Card>
       ))}
-
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />
+            <PaginationPrevious
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
           </PaginationItem>
-          {Array.from({ length: Math.ceil(books.length / booksPerPage) }).map((_, index) => (
-            <PaginationItem key={index}>
-              <PaginationLink onClick={() => paginate(index + 1)} isActive={currentPage === index + 1}>
-                {index + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
           <PaginationItem>
-            <PaginationNext onClick={() => paginate(currentPage + 1)} disabled={currentPage === Math.ceil(books.length / booksPerPage)} />
+            <PaginationLink isActive>{currentPage}</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-      {/* <Button variant="ghost" onClick={handleBackToHome} className="mt-4">
-          Back to Homepage
-        </Button> */}
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this book? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteBook}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

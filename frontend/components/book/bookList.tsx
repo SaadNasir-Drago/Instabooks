@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
 import { BookContext, SelectedBookContext } from "@/context/bookContext";
@@ -13,6 +19,7 @@ import { Genre } from "../../../backend/src/types";
 import { useToast } from "@/hooks/use-toast";
 import { ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 import { BookOpenIcon } from "@heroicons/react/24/solid";
+import { useUserLikes } from "@/context/userLikeContext";
 
 export default function BookList() {
   const placeholder = "https://placehold.jp/150x150.png";
@@ -26,11 +33,59 @@ export default function BookList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [userLikes, setUserLikes] = useState<{ [key: number]: boolean | null }>(
-    {}
-  );
+  const [userLikes, setUserLikes] = useState<{
+    [key: number]: boolean | null;
+  }>();
 
-  console.log(searchTerm);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastBookElementRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setBooks([]);
+    setCurrentPage(1);
+    setHasMore(true);
+  }, [searchTerm, sortBy, selectedGenre]);
+
+  const loadMoreBooks = useCallback(() => {
+    if (!isLoading && hasMore) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  }, [isLoading, hasMore]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          loadMoreBooks();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loadMoreBooks, hasMore]);
+
+  useEffect(() => {
+    const currentObserver = observerRef.current;
+    const currentLastElement = lastBookElementRef.current;
+
+    if (currentLastElement && currentObserver) {
+      currentObserver.observe(currentLastElement);
+    }
+
+    return () => {
+      if (currentLastElement && currentObserver) {
+        currentObserver.unobserve(currentLastElement);
+      }
+    };
+  }, [books]);
 
   useEffect(() => {
     fetchBooks(currentPage, searchTerm, sortBy, selectedGenre);
@@ -42,176 +97,139 @@ export default function BookList() {
     sort: string,
     genre: Genre
   ) => {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       const response = await fetch(
         `http://localhost:4000/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
       );
       const data = await response.json();
-      // console.log(data);
-      setBooks(data.books);
+
+      setBooks((prevBooks) =>
+        page === 1 ? data.books : [...prevBooks, ...data.books]
+      );
+
+      setHasMore(data.books.length > 0);
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Error fetching books:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleBookClick = (book: any) => {
     setSelectedBook(book);
   };
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleLike = async (book_id: number) => {
+  const handleLikeDislike = async (book_id: number, isLike: boolean) => {
     const token = localStorage.getItem("token");
-
+  
     if (!token) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to like books.",
+        description: `Please log in to ${isLike ? "like" : "dislike"} books.`,
         variant: "destructive",
       });
       return;
     }
-
+  
+    const currentUserLikeStatus = userLikes?.[book_id];
+  
+    // Determine the opposite action (if they liked and are now disliking, or vice versa)
+    const oppositeAction = isLike ? false : true;
+  
     try {
-      const response = await fetch(`http://localhost:4000/books/likeDislike`, {
+      // If the user has already performed the opposite action, remove that first
+      if (currentUserLikeStatus === oppositeAction) {
+        await fetch(`http://localhost:4000/likeDislike`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            book_id: book_id,
+            liked: oppositeAction, // Remove the opposite action first
+          }),
+        });
+  
+        setBooks((prevBooks) =>
+          prevBooks.map((book) =>
+            book.book_id === book_id
+              ? {
+                  ...book,
+                  likes: oppositeAction
+                    ? Math.max((book.likes || 0) - 1, 0) // Ensure like count doesn't go below 0
+                    : book.likes,
+                  dislikes: !oppositeAction
+                    ? Math.max((book.dislikes || 0) - 1, 0) // Ensure dislike count doesn't go below 0
+                    : book.dislikes,
+                }
+              : book
+          )
+        );
+      }
+  
+      // Now apply the new action (like or dislike)
+      const response = await fetch(`http://localhost:4000/likeDislike`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          user_id: "",
           book_id: book_id,
-          liked: true,
+          liked: isLike,
         }),
       });
-
+  
       const result = await response.json();
-
-      if (response.status === 400) {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (response.status === 201) {
+      console.log(result);
+  
+      if (response.ok) {
         setUserLikes((prev) => ({
           ...prev,
-          [book_id]: result.success === true ? null : true, // Update UI state
+          [book_id]: result.message.includes("removed") ? null : isLike,
         }));
-
+  
         setBooks((prevBooks) =>
           prevBooks.map((book) =>
             book.book_id === book_id
               ? {
                   ...book,
-                  likes:
-                    book.likes !== undefined && book.likes !== null
-                      ? book.likes + 1
-                      : 1,
+                  likes: isLike
+                    ? result.message === "Book liked successfully"
+                      ? (book.likes || 0) + 1 // Increment like count by 1
+                      : result.message === "Like removed"
+                      ? Math.max((book.likes || 0) - 1, 0) // Decrement like count, but ensure it doesn’t go below 0
+                      : book.likes
+                    : book.likes,
+                  dislikes: !isLike
+                    ? result.message === "Book disliked successfully"
+                      ? (book.dislikes || 0) + 1 // Increment dislike count by 1
+                      : result.message === "Dislike removed"
+                      ? Math.max((book.dislikes || 0) - 1, 0) // Decrement dislike count, but ensure it doesn’t go below 0
+                      : book.dislikes
+                    : book.dislikes,
                 }
               : book
           )
         );
+  
+        // Ensure the like/dislike counts are properly rendered after update
         toast({
-          title: "Success",
-          description: "Book liked successfully!",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Error liking the book",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error in handleLike:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDislike = async (book_id: number) => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to dislike books.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:4000/books/likeDislike`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          user_id: "",
-          book_id: book_id,
-          liked: false,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.status === 400) {
-        toast({
-          title: "Error",
+          title: result.success ? "Success" : "Info",
           description: result.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (response.status === 201) {
-        console.log(result.success);
-        setUserLikes((prev) => ({
-          ...prev,
-          [book_id]: result.success === false ? null : false, // Update UI state
-        }));
-
-        setBooks((prevBooks) =>
-          prevBooks.map((book) =>
-            book.book_id === book_id
-              ? {
-                  ...book,
-                  dislikes:
-                    book.dislikes !== undefined && book.dislikes !== null
-                      ? book.dislikes + 1
-                      : 1,
-                }
-              : book
-          )
-        );
-        toast({
-          title: "Success",
-          description: "Book disliked successfully!",
         });
       } else {
         toast({
           title: "Error",
-          description: "Error disliking the book",
+          description: result.message || `Error processing your request`,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("Error in handleDislike:", error);
+      console.error(`Error in handleLikeDislike:`, error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -223,17 +241,10 @@ export default function BookList() {
   const LoadingSpinner = () => (
     <div className="flex flex-col justify-center items-center h-64 space-y-4">
       <div className="relative">
-        {/* <div className="absolute inset-0 rounded-full border-4 border-primary opacity-50 animate-pulse"></div> */}
         <BookOpenIcon
           className="relative text-primary animate-bounce"
           style={{ width: "96px", height: "96px" }}
         />
-      </div>
-      <div className="text-primary text-lg font-semibold ml-3">
-        {" "}
-        Loading<span className="animate-dot">.</span>
-        <span className="animate-dot">.</span>
-        <span className="animate-dot">.</span>
       </div>
     </div>
   );
@@ -247,23 +258,21 @@ export default function BookList() {
   };
 
   return (
-    <div>
-      {isLoading ? (
+    <>
+      {isLoading && currentPage === 1 ? (
         <LoadingSpinner />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {books.map((book: any) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xxl:grid-cols-6 gap-6">
+          {books.map((book: any, index: number) => (
             <Card
               key={book.book_id}
-              className="shadow-md overflow-hidden flex flex-col h-[700px] justify-between relative group transition-all duration-150 ease-in-out
-           rounded-xl hover:shadow-[0_0_20px_10px_rgba(255,107,107,0.5),
-                                 0_0_20px_10px_rgba(255,165,0,0.5),
-                                 0_0_20px_10px_rgba(255,255,0,0.5)] hover:scale-105"
+              className="flex flex-col h-full overflow-hidden shadow-md transition-all duration-120 ease-in-out rounded-xl hover:shadow-[0_0_20px_10px_rgba(0,0,255,0),0_0_20px_10px_rgba(0,0,255,0.1),0_0_20px_10px_rgba(0,0,255,0.1)] hover:scale-105"
               onClick={() => handleBookClick(book)}
+              ref={index === books.length - 1 ? lastBookElementRef : null}
             >
               <div className="relative z-10 h-full flex flex-col">
                 <Link href="/bookDetails" prefetch={false} className="block">
-                  <div className="relative w-full pt-[140%]">
+                  <div className="relative pt-[140%]">
                     <Image
                       src={getImageSrc(book.cover_img)}
                       alt={book.title}
@@ -273,28 +282,27 @@ export default function BookList() {
                     />
                   </div>
 
-                  <CardContent className="p-4 flex-grow h-[140px] overflow-y-auto scrollbar-hide">
-                    <h2 className="text-xl font-bold mb-2 line-clamp-2">
+                  <CardContent className="p-3 flex-grow h-[140px] overflow-y-auto scrollbar-hide">
+                    <h2 className="text-xl font-bold mb-0 line-clamp-2">
                       {book.title}
                     </h2>
                     <p className="text-gray-500 mb-2">{book.author}</p>
-                    <p className="text-gray-600 line-clamp-6">
+                    <p className="text-gray-600 line-clamp-4">
                       {book.description}
                     </p>
                   </CardContent>
                 </Link>
-                <CardFooter className="flex justify-between items-center p-4">
-                  <div className="flex items-center gap-2">
+                <CardFooter className="flex p-2">
+                  <div className="flex items-center justify-between gap-3">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleLike(book.book_id);
+                        handleLikeDislike(book.book_id, true);
                       }}
                     >
                       <ThumbsUpIcon className="w-6 h-6 text-green-500" />
-
                       <span className="sr-only">Like</span>
                     </Button>
                     <div className="text-gray-500">{book.likes}</div>
@@ -303,7 +311,7 @@ export default function BookList() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDislike(book.book_id);
+                        handleLikeDislike(book.book_id, false);
                       }}
                     >
                       <ThumbsDownIcon className="w-6 h-6 text-red-500" />
@@ -317,23 +325,7 @@ export default function BookList() {
           ))}
         </div>
       )}
-      <div className="mt-6 flex justify-center items-center">
-        <Button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1 || isLoading}
-        >
-          Previous
-        </Button>
-        <span className="mx-4">
-          Page {currentPage} of {totalPages}
-        </span>
-        <Button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || isLoading}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
+      {isLoading && currentPage > 1 && <LoadingSpinner />}
+    </>
   );
 }
