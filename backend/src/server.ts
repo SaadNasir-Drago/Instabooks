@@ -8,7 +8,7 @@ import { corsOptions } from './middlewares/cors';
 import bodyParser from 'body-parser';
 const { Client } = require('@elastic/elasticsearch');
 import { query as pgQuery } from './database'; // Adjust the import path as necessary
-
+import { transferUserData, transferBookData, transferGenreData, transferLikeData, transferGenreBookData } from './scripts/elasticSearch';
 // Configure the server
 const server = express();
 const port = 4000;
@@ -27,10 +27,10 @@ export const esClient = new Client({
     password: 'qEc-GaadE7RX+qNlhfQ2'  // Replace with your password
   },
   tls: {
-    rejectUnauthorized: false // This will disable certificate validation
+    rejectUnauthorized: false // Disable certificate validation
   },
   ssl: {
-    rejectUnauthorized: false // This will disable certificate validation
+    rejectUnauthorized: false // Disable certificate validation
   }
 });
 
@@ -39,9 +39,7 @@ const testElasticSearchConnection = async () => {
   try {
     const health = await esClient.cluster.health();
     console.log('Elasticsearch is up and running');
-    console.log('Full Health Response:', health);
-    // console.log('Elasticsearch is up and running:', health.body); // Ensure you're accessing the body
-    // console.log('Cluster Health Status:', health.body.status); // Log the specific status
+    // console.log('Full Health Response:', health);
   } catch (error) {
     console.error('Elasticsearch connection failed:', error);
   }
@@ -54,6 +52,11 @@ server.use(authRoutes, bookRoutes, userRoutes);
 server.listen(port, async () => {
   console.log(`Server running at http://localhost:${port}`);
   await testElasticSearchConnection(); // Test the Elasticsearch connectionkend
-
-  // await transferData(); // Transfer data from PostgreSQL to Elasticsearch
+  
+  // Transfer data from PostgreSQL to Elasticsearch
+  // await transferBookData(); 
+  // await transferUserData();
+  // await transferGenreData();
+  // await transferGenreBookData();
+  // await transferLikeData();
 });

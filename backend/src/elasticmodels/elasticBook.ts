@@ -1,7 +1,7 @@
-import { Book } from '../types'; // Assuming you have a Book type defined
+import { Book, Genre } from '../types'; // Assuming you have a Book type defined
 import { esClient } from '../server';
 
-export const getBooks = async (
+export const getElasticBooks = async (
   limit: number,
   offset: number,
   search: string,
@@ -71,5 +71,34 @@ export const getBooks = async (
   } catch (error) {
     console.error("Error in getBooks:", error);
     throw error; // Re-throw the error for the caller to handle
+  }
+};
+
+
+export const getElasticGenres = async (): Promise<Genre[] | null> => {
+  try {
+    // Perform the search query to fetch all genres
+    const response = await esClient.search({
+      index: 'genres_index', // Replace with your actual Elasticsearch index name for genres
+      size: 1000, // Adjust the size based on the expected number of genres
+      body: {
+        query: {
+          match_all: {}, // Fetch all genres
+        },
+        sort: [
+          { genre_id: { order: 'desc' } }, // Sort by genre_id in descending order
+        ],
+      },
+    });
+
+    // Map the Elasticsearch response to the Genre type
+    const genres: Genre[] = response.hits.hits.map((hit: any) => ({
+      ...hit._source,
+    }));
+
+    return genres || null;
+  } catch (error) {
+    console.error("Error fetching genres:", error);
+    return null; // You can also throw an error if you prefer to handle it differently
   }
 };

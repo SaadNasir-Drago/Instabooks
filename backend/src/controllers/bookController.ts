@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as bookModel from "../models/bookModel";
+import { getElasticGenres } from "../elasticmodels/elasticBook";
 // import { esClient } from "../server";
 // import { getBooks as elasticBook } from "../config/elasticSearch";
 export const getBooks = async (req: Request, res: Response) => {
@@ -13,16 +14,14 @@ export const getBooks = async (req: Request, res: Response) => {
   
   try {
     
-
-    // const  {books, totalBooks} = await elasticBook( limit, offset, search, sort, genre);
+    // const  {books, totalBooks} = await getElasticBook( limit, offset, search, sort, genre);
 
     // res.json({
     //   books,
     //   totalPages,
     // });
   
-
-    const allbooks = await bookModel.getBooks(
+    const {books, totalBooks} = await bookModel.getBooks(
       limit,
       offset,
       search,
@@ -30,10 +29,10 @@ export const getBooks = async (req: Request, res: Response) => {
       genre
     );
 
-    const totalPages = Math.ceil(allbooks.totalBooks / limit);
+    const totalPages = Math.ceil(totalBooks / limit);
 
     res.json({
-      books: allbooks.books,
+      books,
       totalPages,
     });
     
@@ -110,7 +109,9 @@ export const likeDislikeBook = async (req: Request, res: Response) => {
 
 export const getGenres = async (req: Request, res: Response) => {
   try {
-    const genres = await bookModel.getGenres();
+    // const genres = await bookModel.getGenres();
+
+    const genres = await getElasticGenres();
 
     if (genres) {
       res.status(200).json(genres);
