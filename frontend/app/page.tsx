@@ -1,3 +1,4 @@
+"use client"
 import Navigation from "@/components/book/navigation";
 import BookList from "@/components/book/bookList";
 import GenreList from "@/components/book/genreList";

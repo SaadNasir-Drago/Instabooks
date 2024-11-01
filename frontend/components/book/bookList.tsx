@@ -37,10 +37,9 @@ export default function BookList() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastBookElementRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    setBooks([]);
     setCurrentPage(1);
     setHasMore(true);
-  }, [searchTerm, sortBy, selectedGenre, setBooks]);
+  }, [searchTerm, sortBy, selectedGenre]);
 
   const loadMoreBooks = useCallback(() => {
     if (!isLoading && hasMore) {
@@ -114,7 +113,7 @@ export default function BookList() {
 
   useEffect(() => {
     fetchBooks(currentPage, searchTerm, sortBy, selectedGenre);
-  }, [currentPage, searchTerm, sortBy, selectedGenre, fetchBooks]);
+  }, [currentPage, searchTerm, sortBy, selectedGenre]);
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
