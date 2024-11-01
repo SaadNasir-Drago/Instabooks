@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS genre_books (
 
    
     if (!(await checkIfTableHasData('books'))) {
-      await seedBooks(duplicateDatasetToMillionEntries(bookData, 1200000), userData);
+      await seedBooks(bookData, userData);
     }
 
     

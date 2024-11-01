@@ -84,7 +84,7 @@ export const seedGenreBooks = async (books: jsonBook[], genres: Genre[]) => {
       //  const randomBookId = bookIds[Math.floor(Math.random() * bookIds.length)];
        const randomGenreId = genreIds[Math.floor(Math.random() * genreIds.length)];
       // const genre_id = getRandomNumber(1, genres.length);
-      const book_id = getRandomNumber(1, 1189650);
+      const book_id = getRandomNumber(1, 50000);
 
       const queryText = `
         INSERT INTO genre_books (

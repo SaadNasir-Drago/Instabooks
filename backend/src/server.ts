@@ -6,9 +6,9 @@ import authRoutes from './routes/authRoute';
 import userRoutes from './routes/userRoute';
 import { corsOptions } from './middlewares/cors';
 import bodyParser from 'body-parser';
-const { Client } = require('@elastic/elasticsearch');
+// const { Client } = require('@elastic/elasticsearch');
 import { query as pgQuery } from './database'; // Adjust the import path as necessary
-import { transferUserData, transferBookData, transferGenreData, transferLikeData, transferGenreBookData } from './scripts/elasticSearch';
+// import { transferUserData, transferBookData, transferGenreData, transferLikeData, transferGenreBookData } from './scripts/elasticSearch';
 // Configure the server
 const server = express();
 const port = 4000;
@@ -20,19 +20,19 @@ server.use(bodyParser.urlencoded({ extended: true })); // Middleware for parsing
 server.use('/uploads', express.static('src/uploads')); // Middleware to serve static files
 
 // Create Elasticsearch client
-export const esClient = new Client({
-  node: 'https://localhost:9200',
-  auth: {
-    username: 'elastic', // Replace with your username
-    password: 'qEc-GaadE7RX+qNlhfQ2'  // Replace with your password
-  },
-  tls: {
-    rejectUnauthorized: false // Disable certificate validation
-  },
-  ssl: {
-    rejectUnauthorized: false // Disable certificate validation
-  }
-});
+// export const esClient = new Client({
+//   node: 'https://localhost:9200',
+//   auth: {
+//     username: 'elastic', // Replace with your username
+//     password: 'qEc-GaadE7RX+qNlhfQ2'  // Replace with your password
+//   },
+//   tls: {
+//     rejectUnauthorized: false // Disable certificate validation
+//   },
+//   ssl: {
+//     rejectUnauthorized: false // Disable certificate validation
+//   }
+// });
 
 // Function to test Elasticsearch connection
 // const testElasticSearchConnection = async () => {

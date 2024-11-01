@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as bookModel from "../models/bookModel";
-import { getElasticGenres } from "../elasticmodels/elasticBook";
+// import { getElasticGenres } from "../elasticmodels/elasticBook";
 // import { esClient } from "../server";
 // import { getBooks as elasticBook } from "../config/elasticSearch";
 export const getBooks = async (req: Request, res: Response) => {

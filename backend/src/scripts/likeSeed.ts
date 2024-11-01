@@ -104,7 +104,7 @@ export const seedLikes = async (
       `;
       
       const user_id = getRandomNumber(1, users.length);
-      const book_id = getRandomNumber(1, 1189650);
+      const book_id = getRandomNumber(1, 50000);
       const values = [
         cleanedLike.liked,
         user_id,
