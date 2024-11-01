@@ -15,7 +15,6 @@ export const getUserBooks = async (req: Request, res: Response) => {
 
   try {
     const books = await userModel.getUserBooks(user_id);
-    console.log(books)
     res.status(200).json(books);
   } catch (error) {
     console.error("Error fetching books:", error);

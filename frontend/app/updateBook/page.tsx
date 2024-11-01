@@ -29,7 +29,7 @@ export default function UpdateBook() {
   });
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const { selectedBook, setSelectedBook } = useContext(SelectedBookContext);
+  const { selectedBook } = useContext(SelectedBookContext);
   const placeholder = "https://placehold.jp/150x150.png";
   const genres = [
     "Drama",
@@ -68,11 +68,7 @@ export default function UpdateBook() {
       setBookData({
         ...selectedBook,
         pages: selectedBook.pages || 0,
-        // Provide default values for null fields
-        publish_date: "",
-        // selectedBook.publish_date
-        // ? selectedBook.publish_date.slice(0, 10) // Ensure format 'YYYY-MM-DD'
-        // : "", // Default to empty string if null// Default to empty string
+        publish_date: selectedBook.publish_date || "",
         author: selectedBook.author || "", // Default to empty string
         description: selectedBook.description || "", // Default to empty string
         publisher: selectedBook.publisher || "", // Default to empty string
@@ -80,7 +76,7 @@ export default function UpdateBook() {
       });
       setPreviewUrl(selectedBook.cover_img || null);
     }
-    console.log(bookData);
+   
   }, [selectedBook]);
 
   const handleGenreChange = (genre: string) => {
@@ -143,8 +139,7 @@ export default function UpdateBook() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("Server response:", result);
+        await response.json();
         toast({
           title: "Success",
           description: "Book updated successfully",
@@ -204,7 +199,6 @@ export default function UpdateBook() {
                   id="title"
                   name="title"
                   type="text"
-                  // placeholder={selectedBook?.title}
                   value={bookData.title}
                   onChange={handleChange}
                   required
@@ -242,7 +236,7 @@ export default function UpdateBook() {
                 id="publish_date"
                 name="publish_date"
                 type="date"
-                placeholder={selectedBook?.publish_date ? new Date(selectedBook.publish_date).toLocaleDateString() : "Select a date"}
+                
                 onChange={handleChange}
                 value={bookData.publish_date}
                 required
@@ -260,7 +254,7 @@ export default function UpdateBook() {
                 {isDragActive ? (
                   <p>Drop the image here ...</p>
                 ) : (
-                  <p>Drag 'n' drop an image here, or click to select one</p>
+                  <p>Drag &apos;n&apos; drop an image here, or click to select one</p>
                 )}
               </div>
             </div>

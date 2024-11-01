@@ -56,17 +56,16 @@ export default function ProfilePage() {
   const [profileBooks, setProfileBooks] = useState<BookType[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [booksPerPage] = useState(5)
-  const [displayMode, setDisplayMode] = useState<"all" | "liked">("all")
   const [isLoading, setIsLoading] = useState(true)
   const [bookToDelete, setBookToDelete] = useState<number | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const { toast } = useToast()
-  const { selectedBook, setSelectedBook } = useContext(SelectedBookContext)
+  const { setSelectedBook } = useContext(SelectedBookContext)
 
   useEffect(() => {
     fetchUserData()
     fetchBooksById()
-  }, [])
+  })
 
   const fetchUserData = async () => {
     const token = localStorage.getItem("token")
@@ -111,7 +110,6 @@ export default function ProfilePage() {
         })
       }
       const booksData = await response.json()
-      console.log(booksData)
       setProfileBooks(booksData)
     } catch (error) {
       toast({
@@ -167,12 +165,6 @@ export default function ProfilePage() {
         setBookToDelete(null)
       }
     }
-  }
-
-  const handleDisplayModeChange = (mode: "all" | "liked") => {
-    setDisplayMode(mode)
-    setCurrentPage(1)
-    fetchBooksById()
   }
 
   if (isLoading)

@@ -110,7 +110,6 @@ export default function AddBook() {
       if (uploadedImage) {
         formData.append("cover_img", uploadedImage);
       }
-      console.log(formData);
       const response = await fetch("http://localhost:4000/addbook", {
         method: "POST",
         headers: {
@@ -120,8 +119,7 @@ export default function AddBook() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("Server response:", result);
+        await response.json();
         toast({
           title: "Success",
           description: "Book added successfully",
@@ -228,7 +226,7 @@ export default function AddBook() {
               {isDragActive ? (
                 <p>Drop the image here ...</p>
               ) : (
-                <p>Drag 'n' drop an image here, or click to select one</p>
+                <p>Drag &apos;n&apos; drop an image here, or click to select one</p>
               )}
             </div>
           </div>

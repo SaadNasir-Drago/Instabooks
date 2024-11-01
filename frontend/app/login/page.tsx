@@ -5,14 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useUser } from "@/context/userContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const [user, setUser] = useState<boolean>(false);
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(""); // For error handling
 
@@ -55,7 +52,8 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white rounded-lg shadow-md w-96">
         <h1 className="mb-6 text-3xl font-bold text-center">Login</h1>
-        {error && <p className="text-red-500">{error}</p>} {/* Show error message */}
+        {error && <p className="text-red-500">{error}</p>}{" "}
+        {/* Show error message */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
@@ -84,7 +82,8 @@ export default function LoginPage() {
         <Button
           variant="link"
           className="mt-4 w-full"
-          onClick={() => router.push("/")}>
+          onClick={() => router.push("/")}
+        >
           Back to Home
         </Button>
       </div>
