@@ -35,7 +35,11 @@ const getRandomUserId = (users: User[]): number => {
 // Function to insert data into PostgreSQL
 export const seedBooks = async (books: jsonBook[], user: User[]) => {
   const cleanBooks = cleanBooksArray(books);
-  for (const cleanedBook of cleanBooks) {
+
+   // Limit to the first 500 users
+   const limitedbooks = cleanBooks.slice(0, 200);
+   const limitedUsers = user.slice(0, 200);
+  for (const cleanedBook of limitedbooks) {
   
 
     try {
@@ -59,7 +63,7 @@ export const seedBooks = async (books: jsonBook[], user: User[]) => {
         cleanedBook.author,
         cleanedBook.description,
         cleanedBook.publisher,
-        getRandomUserId(user), 
+        getRandomUserId(limitedUsers), 
         
       ];
 

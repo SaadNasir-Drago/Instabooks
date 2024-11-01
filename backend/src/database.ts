@@ -4,7 +4,6 @@ import { seedUsers } from "./scripts/userSeed";
 import { seedGenres } from "./scripts/genreSeed";
 import { seedLikes } from "./scripts/likeSeed";
 import { seedGenreBooks } from "./scripts/genreBookSeed";
-import fs from 'fs';
 import { duplicateDatasetToMillionEntries } from "./scripts/oneMillion";
 const bookData = require("./data/books.json");
 const userData = require("./data/user.json");
@@ -12,11 +11,14 @@ const genreData = require("./data/Genre.json");
 const likeData = require("./data/Like.json");
 
 const sql = new Pool({
-  user: "postgres",
-  host: "localhost",
+  user: "instabooksdb_owner",
+  host: "ep-flat-hill-a6j8zxyr.us-west-2.aws.neon.tech",
   port: 5432,
-  database: "postgres",
-  password: "root",
+  database: "instabooksdb",
+  password: "nf81xPpNSrvJ",
+  ssl: {
+    rejectUnauthorized: false, // This is not recommended for production
+  },
 });
 
 export const query = (text: string, params?: any[]) => sql.query(text, params);

@@ -89,8 +89,11 @@ export const seedLikes = async (
   books: jsonBook[]
 ) => {
   const booksArray = cleanBooksArray(books);
+  // Limit to the first 500 users
+  const limitedlikes = likes.slice(0, 200);
+  const limitedUsers = users.slice(0, 200);
 
-  for (const likeData of likes) {
+  for (const likeData of limitedlikes) {
     const cleanedLike = cleanLikeData(likeData);
     
     try {
@@ -103,8 +106,8 @@ export const seedLikes = async (
         ON CONFLICT (like_id) DO NOTHING;
       `;
       
-      const user_id = getRandomNumber(1, users.length);
-      const book_id = getRandomNumber(1, 50000);
+      const user_id = getRandomNumber(1, limitedUsers.length);
+      const book_id = getRandomNumber(1, 200);
       const values = [
         cleanedLike.liked,
         user_id,

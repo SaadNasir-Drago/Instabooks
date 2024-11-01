@@ -65,7 +65,7 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchUserData()
     fetchBooksById()
-  })
+  }, [])
 
   const fetchUserData = async () => {
     const token = localStorage.getItem("token")

@@ -52,8 +52,11 @@ export const seedGenreBooks = async (books: jsonBook[], genres: Genre[]) => {
     console.warn("No valid books to seed.");
     return;
   }
+  
+   // Limit to the first 500 users
+   const limitedbooks = booksArray.slice(0, 200);
 
-  for (const bookData of booksArray) {
+  for (const bookData of limitedbooks) {
     try {
       // const bookId = await getRandomBookIdFromDatabase();
       // const genreId = await getRandomGenreIdFromDatabase();
@@ -84,7 +87,7 @@ export const seedGenreBooks = async (books: jsonBook[], genres: Genre[]) => {
       //  const randomBookId = bookIds[Math.floor(Math.random() * bookIds.length)];
        const randomGenreId = genreIds[Math.floor(Math.random() * genreIds.length)];
       // const genre_id = getRandomNumber(1, genres.length);
-      const book_id = getRandomNumber(1, 50000);
+      const book_id = getRandomNumber(1, 200);
 
       const queryText = `
         INSERT INTO genre_books (

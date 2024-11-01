@@ -28,7 +28,11 @@ const cleanUserData = (user: User): User => {
 
 // Function to insert user data into PostgreSQL
 export const seedUsers = async (users: User[]) => {
-  for (const userData of users) {
+
+  // Limit to the first 500 users
+  const limitedUsers = users.slice(0, 200);
+
+  for (const userData of limitedUsers) {
     const cleanedUser = cleanUserData(userData);
     try {
       const queryText = `
