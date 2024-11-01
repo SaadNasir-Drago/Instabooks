@@ -19,7 +19,7 @@ export default function LoginPage() {
     setError(""); // Reset error state before the new attempt
 
     try {
-      const response = await fetch("http://localhost:4000/user", {
+      const response = await fetch("https://instabooks.onrender.com/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

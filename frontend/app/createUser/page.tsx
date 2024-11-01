@@ -19,7 +19,7 @@ export default function CreateUser() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       toast({
         title: "Error",
@@ -32,27 +32,33 @@ export default function CreateUser() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:4000/createUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_name, last_name, email, password }),
-      });
-            
+      const response = await fetch(
+        "https://instabooks.onrender.com/createUser",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ first_name, last_name, email, password }),
+        }
+      );
+
       if (response.ok) {
         toast({
           title: "Success",
           description: "User account created successfully",
         });
-        router.push('/login');
+        router.push("/login");
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create user');
+        throw new Error(errorData.message || "Failed to create user");
       }
     } catch (error) {
       console.error("Error creating user:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create user. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create user. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -128,7 +134,7 @@ export default function CreateUser() {
         <Button
           variant="link"
           className="mt-4 w-full"
-          onClick={() => router.push('/')}
+          onClick={() => router.push("/")}
         >
           Back to Home
         </Button>

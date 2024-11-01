@@ -110,7 +110,7 @@ export default function AddBook() {
       if (uploadedImage) {
         formData.append("cover_img", uploadedImage);
       }
-      const response = await fetch("http://localhost:4000/addbook", {
+      const response = await fetch("https://instabooks.onrender.com/addbook", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -144,7 +144,7 @@ export default function AddBook() {
       setIsLoading(false);
     }
   };
-  
+
   const LoadingSpinner = () => (
     <div className="flex flex-col justify-center items-center h-64 space-y-4">
       <div className="relative">
@@ -162,140 +162,144 @@ export default function AddBook() {
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-      <div className="p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
-        <h1 className="mb-6 text-3xl font-bold text-center">Add New Book</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                name="title"
-                type="text"
-                value={bookData.title}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="author">Author</Label>
-              <Input
-                id="author"
-                name="author"
-                type="text"
-                value={bookData.author}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="pages">Number of Pages</Label>
-              <Input
-                id="pages"
-                name="pages"
-                type="number"
-                min="1"
-                value={bookData.pages}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="publishDate">Publish Date</Label>
-            <Input
-              id="publishDate"
-              name="publishDate"
-              type="date"
-              value={bookData.publishDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <Label>Upload Cover Image</Label>
-            <div
-              {...getRootProps()}
-              className={`mt-2 border-2 border-dashed rounded-md p-4 text-center cursor-pointer ${
-                isDragActive ? "border-primary" : "border-gray-300"
-              }`}
-            >
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <p>Drop the image here ...</p>
-              ) : (
-                <p>Drag &apos;n&apos; drop an image here, or click to select one</p>
-              )}
-            </div>
-          </div>
-          {previewUrl && (
-            <div className="mt-4">
-              <Label>Preview</Label>
-              <div className="mt-2 relative h-48 w-full">
-                <Image
-                  src={previewUrl}
-                  alt="Cover preview"
-                  fill
-                  style={{ objectFit: "contain" }}
+        <div className="p-8 bg-white rounded-lg shadow-md w-full max-w-2xl">
+          <h1 className="mb-6 text-3xl font-bold text-center">Add New Book</h1>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  type="text"
+                  value={bookData.title}
+                  onChange={handleChange}
+                  required
                 />
               </div>
             </div>
-          )}
-          <div>
-            <Label>Genres</Label>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {genres.map((genre) => (
-                <div key={genre} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={genre}
-                    checked={bookData.genres.includes(genre)}
-                    onCheckedChange={() => handleGenreChange(genre)}
-                  />
-                  <label
-                    htmlFor={genre}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {genre}
-                  </label>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="author">Author</Label>
+                <Input
+                  id="author"
+                  name="author"
+                  type="text"
+                  value={bookData.author}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="pages">Number of Pages</Label>
+                <Input
+                  id="pages"
+                  name="pages"
+                  type="number"
+                  min="1"
+                  value={bookData.pages}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={bookData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="publisher">Publisher</Label>
-            <Input
-              id="publisher"
-              name="publisher"
-              type="text"
-              value={bookData.publisher}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            Add Book
+            <div>
+              <Label htmlFor="publishDate">Publish Date</Label>
+              <Input
+                id="publishDate"
+                name="publishDate"
+                type="date"
+                value={bookData.publishDate}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <Label>Upload Cover Image</Label>
+              <div
+                {...getRootProps()}
+                className={`mt-2 border-2 border-dashed rounded-md p-4 text-center cursor-pointer ${
+                  isDragActive ? "border-primary" : "border-gray-300"
+                }`}
+              >
+                <input {...getInputProps()} />
+                {isDragActive ? (
+                  <p>Drop the image here ...</p>
+                ) : (
+                  <p>
+                    Drag &apos;n&apos; drop an image here, or click to select
+                    one
+                  </p>
+                )}
+              </div>
+            </div>
+            {previewUrl && (
+              <div className="mt-4">
+                <Label>Preview</Label>
+                <div className="mt-2 relative h-48 w-full">
+                  <Image
+                    src={previewUrl}
+                    alt="Cover preview"
+                    fill
+                    style={{ objectFit: "contain" }}
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <Label>Genres</Label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {genres.map((genre) => (
+                  <div key={genre} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={genre}
+                      checked={bookData.genres.includes(genre)}
+                      onCheckedChange={() => handleGenreChange(genre)}
+                    />
+                    <label
+                      htmlFor={genre}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {genre}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={bookData.description}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="publisher">Publisher</Label>
+              <Input
+                id="publisher"
+                name="publisher"
+                type="text"
+                value={bookData.publisher}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              Add Book
+            </Button>
+          </form>
+          <Button
+            variant="link"
+            className="mt-4 w-full"
+            onClick={() => router.push("/")}
+          >
+            Back to Homepage
           </Button>
-        </form>
-        <Button
-          variant="link"
-          className="mt-4 w-full"
-          onClick={() => router.push("/")}
-        >
-          Back to Homepage
-        </Button>
-      </div> ) }
+        </div>
+      )}
     </div>
   );
 }

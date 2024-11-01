@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useContext } from "react"
-import { Button } from "@/components/ui/button"
+import React, { useState, useEffect, useContext } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +18,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -26,25 +26,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import Image from "next/image"
-import { useToast } from "@/hooks/use-toast"
-import Navigation from "@/components/book/navigation"
-import { Book, Building, Calendar, User } from "lucide-react"
-import { Book as BookType } from "../../../backend/src/types"
-import Link from "next/link"
-import { SelectedBookContext } from "@/context/bookContext"
+} from "@/components/ui/dialog";
+import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import Navigation from "@/components/book/navigation";
+import { Book, Building, Calendar, User } from "lucide-react";
+import { Book as BookType } from "../../../backend/src/types";
+import Link from "next/link";
+import { SelectedBookContext } from "@/context/bookContext";
 
 type User = {
-  id: string
-  first_name: string
-  last_name: string
-  email: string
-  password: string
-}
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+};
 
 export default function ProfilePage() {
-  const placeholder = "https://placehold.jp/150x150.png"
+  const placeholder = "https://placehold.jp/150x150.png";
 
   const [user, setUser] = useState<User | null>({
     id: "",
@@ -52,141 +52,152 @@ export default function ProfilePage() {
     last_name: "",
     email: "",
     password: "",
-  })
-  const [profileBooks, setProfileBooks] = useState<BookType[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [booksPerPage] = useState(5)
-  const [isLoading, setIsLoading] = useState(true)
-  const [bookToDelete, setBookToDelete] = useState<number | null>(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const { toast } = useToast()
-  const { setSelectedBook } = useContext(SelectedBookContext)
+  });
+  const [profileBooks, setProfileBooks] = useState<BookType[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [booksPerPage] = useState(5);
+  const [isLoading, setIsLoading] = useState(true);
+  const [bookToDelete, setBookToDelete] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const { setSelectedBook } = useContext(SelectedBookContext);
 
   useEffect(() => {
-    fetchUserData()
-    fetchBooksById()
-  }, [])
+    fetchUserData();
+    fetchBooksById();
+  }, []);
 
   const fetchUserData = async () => {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:4000/profileUser", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!response.ok) throw new Error("Failed to fetch user data")
-      const userData = await response.json()
-      setUser(userData)
+      const response = await fetch(
+        "https://instabooks.onrender.com/profileUser",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to fetch user data");
+      const userData = await response.json();
+      setUser(userData);
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to load user data. Please try again later.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const fetchBooksById = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:4000/profileBooks`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `https://instabooks.onrender.com/profileBooks`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      if (!response.ok) throw new Error("Failed to fetch books")
+      if (!response.ok) throw new Error("Failed to fetch books");
       else if (response.status === 401) {
         toast({
           title: "Error",
           description: "Unauthorized",
           variant: "destructive",
-        })
+        });
       }
-      const booksData = await response.json()
-      setProfileBooks(booksData)
+      const booksData = await response.json();
+      setProfileBooks(booksData);
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to load books. Please try again later.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const indexOfLastBook = currentPage * booksPerPage
-  const indexOfFirstBook = indexOfLastBook - booksPerPage
-  const currentBooks = profileBooks.slice(indexOfFirstBook, indexOfLastBook)
-  const totalPages = Math.ceil(profileBooks.length / booksPerPage)
+  const indexOfLastBook = currentPage * booksPerPage;
+  const indexOfFirstBook = indexOfLastBook - booksPerPage;
+  const currentBooks = profileBooks.slice(indexOfFirstBook, indexOfLastBook);
+  const totalPages = Math.ceil(profileBooks.length / booksPerPage);
   const paginate = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber)
+      setCurrentPage(pageNumber);
     }
-  }
+  };
   const handleUpdateBook = async (book: BookType) => {
-    setSelectedBook(book)
-  }
+    setSelectedBook(book);
+  };
 
   const handleDeleteBook = async (book_id: number) => {
-    setBookToDelete(book_id)
-    setIsDeleteDialogOpen(true)
-  }
+    setBookToDelete(book_id);
+    setIsDeleteDialogOpen(true);
+  };
 
   const confirmDeleteBook = async () => {
     if (bookToDelete) {
       try {
-        const response = await fetch(`http://localhost:4000/book/${bookToDelete}`, {
-          method: "DELETE",
-        })
+        const response = await fetch(
+          `https://instabooks.onrender.com/book/${bookToDelete}`,
+          {
+            method: "DELETE",
+          }
+        );
         if (!response.ok) {
-          throw new Error("Failed to delete book")
+          throw new Error("Failed to delete book");
         }
-        setProfileBooks(profileBooks.filter((book) => book.book_id !== bookToDelete))
+        setProfileBooks(
+          profileBooks.filter((book) => book.book_id !== bookToDelete)
+        );
         toast({
           title: "Success",
           description: "Book deleted successfully.",
-        })
+        });
       } catch (error) {
         toast({
           title: "Error",
           description: "Failed to delete book. Please try again.",
           variant: "destructive",
-        })
+        });
       } finally {
-        setIsDeleteDialogOpen(false)
-        setBookToDelete(null)
+        setIsDeleteDialogOpen(false);
+        setBookToDelete(null);
       }
     }
-  }
+  };
 
   if (isLoading)
     return (
       <div className="flex justify-center items-center h-screen">
         Loading...
       </div>
-    )
+    );
   if (!user)
     return (
       <div className="flex justify-center items-center h-screen">
         User not found
       </div>
-    )
+    );
 
   const getImageSrc = (cover_img: string) => {
-    if (!cover_img) return placeholder
+    if (!cover_img) return placeholder;
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
-      return cover_img
+      return cover_img;
     }
-    return `http://localhost:4000/uploads/${cover_img}`
-  }
+    return `https://instabooks.onrender.com/uploads/${cover_img}`;
+  };
 
   return (
     <div className="container mx-auto px-8 py-3">
@@ -249,9 +260,7 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-4 mb-6 ">
                   <div className="flex items-center">
                     <Building className="mr-2 h-5 w-5 text-gray-500" />
-                    <span className="text-lg">
-                      Publisher: {book.publisher}
-                    </span>
+                    <span className="text-lg">Publisher: {book.publisher}</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="mr-2 h-5 w-5 text-gray-500" />
@@ -268,7 +277,7 @@ export default function ProfilePage() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Link href={'/updateBook'}>
+            <Link href={"/updateBook"}>
               <Button onClick={() => handleUpdateBook(book)}>Update</Button>
             </Link>
             <Button
@@ -305,11 +314,15 @@ export default function ProfilePage() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this book? This action cannot be undone.
+              Are you sure you want to delete this book? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDeleteBook}>
@@ -319,5 +332,5 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

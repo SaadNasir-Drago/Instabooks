@@ -9,7 +9,7 @@ function GenreList() {
 
   useEffect(() => {
     async function fetchGenres() {
-      const response = await fetch(`http://localhost:4000/genres`);
+      const response = await fetch(`https://instabooks.onrender.com/genres`);
       
       if (response.ok) {
         const data = await response.json();

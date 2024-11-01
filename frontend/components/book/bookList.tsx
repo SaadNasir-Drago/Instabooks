@@ -31,9 +31,11 @@ export default function BookList() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [userLikes, setUserLikes] = useState<{ [key: number]: boolean | null }>({});
+  const [userLikes, setUserLikes] = useState<{ [key: number]: boolean | null }>(
+    {}
+  );
   const [hasMore, setHasMore] = useState(true);
-  
+
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastBookElementRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function BookList() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:4000/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
+          `https://instabooks.onrender.com/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
         );
         const data = await response.json();
 
@@ -121,7 +123,7 @@ export default function BookList() {
 
   const handleLikeDislike = async (book_id: number, isLike: boolean) => {
     const token = localStorage.getItem("token");
-  
+
     if (!token) {
       toast({
         title: "Authentication Required",
@@ -130,13 +132,13 @@ export default function BookList() {
       });
       return;
     }
-  
+
     const currentUserLikeStatus = userLikes[book_id];
     const oppositeAction = isLike ? false : true;
-  
+
     try {
       if (currentUserLikeStatus === oppositeAction) {
-        await fetch(`http://localhost:4000/likeDislike`, {
+        await fetch(`https://instabooks.onrender.com/likeDislike`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -147,7 +149,7 @@ export default function BookList() {
             liked: oppositeAction,
           }),
         });
-  
+
         setBooks((prevBooks) =>
           prevBooks.map((book) =>
             book.book_id === book_id
@@ -164,27 +166,30 @@ export default function BookList() {
           )
         );
       }
-  
-      const response = await fetch(`http://localhost:4000/likeDislike`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          book_id: book_id,
-          liked: isLike,
-        }),
-      });
-  
+
+      const response = await fetch(
+        `https://instabooks.onrender.com/likeDislike`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            book_id: book_id,
+            liked: isLike,
+          }),
+        }
+      );
+
       const result = await response.json();
-  
+
       if (response.ok) {
         setUserLikes((prev) => ({
           ...prev,
           [book_id]: result.message.includes("removed") ? null : isLike,
         }));
-  
+
         setBooks((prevBooks) =>
           prevBooks.map((book) =>
             book.book_id === book_id
@@ -208,7 +213,7 @@ export default function BookList() {
               : book
           )
         );
-  
+
         toast({
           title: result.success ? "Success" : "Info",
           description: result.message,
@@ -246,7 +251,7 @@ export default function BookList() {
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `http://localhost:4000/uploads/${cover_img}`;
+    return `https://instabooks.onrender.com/uploads/${cover_img}`;
   };
 
   return (

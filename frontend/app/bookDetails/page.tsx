@@ -25,13 +25,12 @@ export default function BookDetails() {
     [key: number]: boolean | null;
   }>();
 
-  
   if (!selectedBook) {
     return <div>No book selected</div>;
   }
   const handleLikeDislike = async (book_id: number, isLike: boolean) => {
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
       toast({
         title: "Authentication Required",
@@ -40,13 +39,13 @@ export default function BookDetails() {
       });
       return;
     }
-  
+
     const currentUserLikeStatus = userLikes?.[book_id];
     const oppositeAction = isLike ? false : true;
-  
+
     try {
       if (currentUserLikeStatus === oppositeAction) {
-        await fetch(`http://localhost:4000/likeDislike`, {
+        await fetch(`https://instabooks.onrender.com/likeDislike`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -57,9 +56,9 @@ export default function BookDetails() {
             liked: oppositeAction,
           }),
         });
-  
-        setBooks((prevBooks) => 
-          prevBooks.map((book) => 
+
+        setBooks((prevBooks) =>
+          prevBooks.map((book) =>
             book.book_id === book_id
               ? {
                   ...book,
@@ -74,27 +73,30 @@ export default function BookDetails() {
           )
         );
       }
-  
-      const response = await fetch(`http://localhost:4000/likeDislike`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          book_id,
-          liked: isLike,
-        }),
-      });
-  
+
+      const response = await fetch(
+        `https://instabooks.onrender.com/likeDislike`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            book_id,
+            liked: isLike,
+          }),
+        }
+      );
+
       const result = await response.json();
-  
+
       if (response.ok) {
         setUserLikes((prev) => ({
           ...prev,
           [book_id]: result.message.includes("removed") ? null : isLike,
         }));
-  
+
         setBooks((prevBooks) => {
           const updatedBooks = prevBooks.map((book) =>
             book.book_id === book_id
@@ -117,13 +119,15 @@ export default function BookDetails() {
                 }
               : book
           );
-  
-          const updatedSelectedBook = updatedBooks.find((b) => b.book_id === book_id);
+
+          const updatedSelectedBook = updatedBooks.find(
+            (b) => b.book_id === book_id
+          );
           if (updatedSelectedBook) setSelectedBook(updatedSelectedBook);
-  
+
           return updatedBooks;
         });
-  
+
         toast({
           title: result.success ? "Success" : "Info",
           description: result.message,
@@ -150,7 +154,7 @@ export default function BookDetails() {
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `http://localhost:4000/uploads/${cover_img}`;
+    return `https://instabooks.onrender.com/uploads/${cover_img}`;
   };
 
   return (
@@ -201,34 +205,36 @@ export default function BookDetails() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-6">
-                <CardFooter className="flex p-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLikeDislike(selectedBook.book_id, true);
-                      }}
-                    >
-                      <ThumbsUpIcon className="w-6 h-6 text-green-500" />
-                      <span className="sr-only">Like</span>
-                    </Button>
-                    <div className="text-gray-500">{selectedBook.likes}</div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLikeDislike(selectedBook.book_id, false);
-                      }}
-                    >
-                      <ThumbsDownIcon className="w-6 h-6 text-red-500" />
-                      <span className="sr-only">Dislike</span>
-                    </Button>
-                    <div className="text-gray-500">{selectedBook.dislikes}</div>
-                  </div>
-                </CardFooter>
+                  <CardFooter className="flex p-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLikeDislike(selectedBook.book_id, true);
+                        }}
+                      >
+                        <ThumbsUpIcon className="w-6 h-6 text-green-500" />
+                        <span className="sr-only">Like</span>
+                      </Button>
+                      <div className="text-gray-500">{selectedBook.likes}</div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLikeDislike(selectedBook.book_id, false);
+                        }}
+                      >
+                        <ThumbsDownIcon className="w-6 h-6 text-red-500" />
+                        <span className="sr-only">Dislike</span>
+                      </Button>
+                      <div className="text-gray-500">
+                        {selectedBook.dislikes}
+                      </div>
+                    </div>
+                  </CardFooter>
                 </div>
               </div>
             </div>

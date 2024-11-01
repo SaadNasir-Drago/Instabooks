@@ -53,7 +53,6 @@ export default function UpdateBook() {
     "Film-Noir",
   ];
 
-  
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -76,7 +75,6 @@ export default function UpdateBook() {
       });
       setPreviewUrl(selectedBook.cover_img || null);
     }
-   
   }, [selectedBook]);
 
   const handleGenreChange = (genre: string) => {
@@ -129,14 +127,17 @@ export default function UpdateBook() {
       if (uploadedImage) {
         formData.append("cover_img", uploadedImage);
       }
-     
-      const response = await fetch(`http://localhost:4000/updateBook/${bookData.book_id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+
+      const response = await fetch(
+        `https://instabooks.onrender.com/updateBook/${bookData.book_id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         await response.json();
@@ -164,13 +165,13 @@ export default function UpdateBook() {
       setIsLoading(false);
     }
   };
-  
+
   const getImageSrc = (cover_img: string) => {
     if (!cover_img) return placeholder;
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `http://localhost:4000/uploads/${cover_img}`;
+    return `https://instabooks.onrender.com/uploads/${cover_img}`;
   };
   const LoadingSpinner = () => (
     <div className="flex flex-col justify-center items-center h-64 space-y-4">
@@ -236,7 +237,6 @@ export default function UpdateBook() {
                 id="publish_date"
                 name="publish_date"
                 type="date"
-                
                 onChange={handleChange}
                 value={bookData.publish_date}
                 required
@@ -254,7 +254,10 @@ export default function UpdateBook() {
                 {isDragActive ? (
                   <p>Drop the image here ...</p>
                 ) : (
-                  <p>Drag &apos;n&apos; drop an image here, or click to select one</p>
+                  <p>
+                    Drag &apos;n&apos; drop an image here, or click to select
+                    one
+                  </p>
                 )}
               </div>
             </div>
