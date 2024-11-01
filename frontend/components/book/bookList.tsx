@@ -15,11 +15,10 @@ import Image from "next/image";
 import { useSearch } from "@/context/searchContext";
 import { useSort } from "@/context/sortContext";
 import { useGenre } from "@/context/genreContext";
-import { Genre } from "../../../backend/src/types";
+import { Book, Genre } from "../../../backend/src/types";
 import { useToast } from "@/hooks/use-toast";
 import { ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 import { BookOpenIcon } from "@heroicons/react/24/solid";
-import { useUserLikes } from "@/context/userLikeContext";
 
 export default function BookList() {
   const placeholder = "https://placehold.jp/150x150.png";
@@ -31,21 +30,17 @@ export default function BookList() {
   const { toast } = useToast();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [userLikes, setUserLikes] = useState<{
-    [key: number]: boolean | null;
-  }>();
-
+  const [userLikes, setUserLikes] = useState<{ [key: number]: boolean | null }>({});
   const [hasMore, setHasMore] = useState(true);
+  
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastBookElementRef = useRef<HTMLDivElement | null>(null);
-
   useEffect(() => {
     setBooks([]);
     setCurrentPage(1);
     setHasMore(true);
-  }, [searchTerm, sortBy, selectedGenre]);
+  }, [searchTerm, sortBy, selectedGenre, setBooks]);
 
   const loadMoreBooks = useCallback(() => {
     if (!isLoading && hasMore) {
@@ -68,6 +63,7 @@ export default function BookList() {
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
+        observerRef.current = null;
       }
     };
   }, [loadMoreBooks, hasMore]);
@@ -87,40 +83,43 @@ export default function BookList() {
     };
   }, [books]);
 
+  const fetchBooks = useCallback(
+    async (page: number, search: string, sort: string, genre: Genre) => {
+      if (isLoading) return;
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:4000/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
+        );
+        const data = await response.json();
+
+        setBooks((prevBooks) =>
+          page === 1 ? data.books : [...prevBooks, ...data.books]
+        );
+
+        setHasMore(data.books.length > 0);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+        toast({
+          title: "Error Fetching Books",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, setBooks, toast]
+  );
+
   useEffect(() => {
     fetchBooks(currentPage, searchTerm, sortBy, selectedGenre);
-  }, [currentPage, searchTerm, sortBy, selectedGenre]);
+  }, [currentPage, searchTerm, sortBy, selectedGenre, fetchBooks]);
 
-  const fetchBooks = async (
-    page: number,
-    search: string,
-    sort: string,
-    genre: Genre
-  ) => {
-    if (isLoading) return;
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `http://localhost:4000/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
-      );
-      const data = await response.json();
-
-      setBooks((prevBooks) =>
-        page === 1 ? data.books : [...prevBooks, ...data.books]
-      );
-
-      setHasMore(data.books.length > 0);
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBookClick = (book: any) => {
+  const handleBookClick = (book: Book) => {
     setSelectedBook(book);
   };
+
   const handleLikeDislike = async (book_id: number, isLike: boolean) => {
     const token = localStorage.getItem("token");
   
@@ -133,13 +132,10 @@ export default function BookList() {
       return;
     }
   
-    const currentUserLikeStatus = userLikes?.[book_id];
-  
-    // Determine the opposite action (if they liked and are now disliking, or vice versa)
+    const currentUserLikeStatus = userLikes[book_id];
     const oppositeAction = isLike ? false : true;
   
     try {
-      // If the user has already performed the opposite action, remove that first
       if (currentUserLikeStatus === oppositeAction) {
         await fetch(`http://localhost:4000/likeDislike`, {
           method: "POST",
@@ -149,7 +145,7 @@ export default function BookList() {
           },
           body: JSON.stringify({
             book_id: book_id,
-            liked: oppositeAction, // Remove the opposite action first
+            liked: oppositeAction,
           }),
         });
   
@@ -159,10 +155,10 @@ export default function BookList() {
               ? {
                   ...book,
                   likes: oppositeAction
-                    ? Math.max((book.likes || 0) - 1, 0) // Ensure like count doesn't go below 0
+                    ? Math.max((book.likes || 0) - 1, 0)
                     : book.likes,
                   dislikes: !oppositeAction
-                    ? Math.max((book.dislikes || 0) - 1, 0) // Ensure dislike count doesn't go below 0
+                    ? Math.max((book.dislikes || 0) - 1, 0)
                     : book.dislikes,
                 }
               : book
@@ -170,7 +166,6 @@ export default function BookList() {
         );
       }
   
-      // Now apply the new action (like or dislike)
       const response = await fetch(`http://localhost:4000/likeDislike`, {
         method: "POST",
         headers: {
@@ -184,7 +179,6 @@ export default function BookList() {
       });
   
       const result = await response.json();
-      console.log(result);
   
       if (response.ok) {
         setUserLikes((prev) => ({
@@ -199,16 +193,16 @@ export default function BookList() {
                   ...book,
                   likes: isLike
                     ? result.message === "Book liked successfully"
-                      ? (book.likes || 0) + 1 // Increment like count by 1
+                      ? (book.likes || 0) + 1
                       : result.message === "Like removed"
-                      ? Math.max((book.likes || 0) - 1, 0) // Decrement like count, but ensure it doesn’t go below 0
+                      ? Math.max((book.likes || 0) - 1, 0)
                       : book.likes
                     : book.likes,
                   dislikes: !isLike
                     ? result.message === "Book disliked successfully"
-                      ? (book.dislikes || 0) + 1 // Increment dislike count by 1
+                      ? (book.dislikes || 0) + 1
                       : result.message === "Dislike removed"
-                      ? Math.max((book.dislikes || 0) - 1, 0) // Decrement dislike count, but ensure it doesn’t go below 0
+                      ? Math.max((book.dislikes || 0) - 1, 0)
                       : book.dislikes
                     : book.dislikes,
                 }
@@ -216,7 +210,6 @@ export default function BookList() {
           )
         );
   
-        // Ensure the like/dislike counts are properly rendered after update
         toast({
           title: result.success ? "Success" : "Info",
           description: result.message,
@@ -224,12 +217,12 @@ export default function BookList() {
       } else {
         toast({
           title: "Error",
-          description: result.message || `Error processing your request`,
+          description: result.message || "Error processing your request",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error(`Error in handleLikeDislike:`, error);
+      console.error("Error in handleLikeDislike:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -263,7 +256,7 @@ export default function BookList() {
         <LoadingSpinner />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xxl:grid-cols-6 gap-6">
-          {books.map((book: any, index: number) => (
+          {books.map((book: Book, index: number) => (
             <Card
               key={book.book_id}
               className="flex flex-col h-full overflow-hidden shadow-md transition-all duration-120 ease-in-out rounded-xl hover:shadow-[0_0_20px_10px_rgba(0,0,255,0),0_0_20px_10px_rgba(0,0,255,0.1),0_0_20px_10px_rgba(0,0,255,0.1)] hover:scale-105"

@@ -94,7 +94,6 @@ export const getBookById = async (id: number): Promise<Book | null> => {
 
 export const createBook = async (book: any): Promise<void> => {
   try {
-    console.log(book)
     const queryText1 = `
     INSERT INTO books (
       title, pages, publish_date,  cover_img, author, description, publisher, user_id

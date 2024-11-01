@@ -59,7 +59,6 @@ export const getElasticBooks = async (
               [{ book_id: { order: 'asc' } }],
       },
     });
-    console.log(response);
     const totalBooks = response.hits.total.value; // Get total count of documents
     const books: Book[] = response.hits.hits.map((hit: any) => ({
       ...hit._source,

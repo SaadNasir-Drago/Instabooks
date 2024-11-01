@@ -109,9 +109,9 @@ export const likeDislikeBook = async (req: Request, res: Response) => {
 
 export const getGenres = async (req: Request, res: Response) => {
   try {
-    // const genres = await bookModel.getGenres();
+    const genres = await bookModel.getGenres();
 
-    const genres = await getElasticGenres();
+    // const genres = await getElasticGenres();
 
     if (genres) {
       res.status(200).json(genres);

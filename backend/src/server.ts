@@ -35,15 +35,15 @@ export const esClient = new Client({
 });
 
 // Function to test Elasticsearch connection
-const testElasticSearchConnection = async () => {
-  try {
-    const health = await esClient.cluster.health();
-    console.log('Elasticsearch is up and running');
-    // console.log('Full Health Response:', health);
-  } catch (error) {
-    console.error('Elasticsearch connection failed:', error);
-  }
-};
+// const testElasticSearchConnection = async () => {
+//   try {
+//     const health = await esClient.cluster.health();
+//     console.log('Elasticsearch is up and running');
+//     // console.log('Full Health Response:', health);
+//   } catch (error) {
+//     console.error('Elasticsearch connection failed:', error);
+//   }
+// };
 
 // Configure the routes
 server.use(authRoutes, bookRoutes, userRoutes);
@@ -51,7 +51,7 @@ server.use(authRoutes, bookRoutes, userRoutes);
 // Start the server
 server.listen(port, async () => {
   console.log(`Server running at http://localhost:${port}`);
-  await testElasticSearchConnection(); // Test the Elasticsearch connectionkend
+  // await testElasticSearchConnection(); // Test the Elasticsearch connectionkend
   
   // Transfer data from PostgreSQL to Elasticsearch
   // await transferBookData(); 

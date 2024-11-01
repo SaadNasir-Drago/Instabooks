@@ -37,9 +37,7 @@ export default function CreateUser() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ first_name, last_name, email, password }),
       });
-      
-      console.log(response);
-      
+            
       if (response.ok) {
         toast({
           title: "Success",

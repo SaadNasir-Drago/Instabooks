@@ -13,7 +13,6 @@ function GenreList() {
       
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         // Set genres state to include the "All" genre along with fetched genres
         setGenres([{ genre_id: 0, genre_name: "All" }, ...data]);
         

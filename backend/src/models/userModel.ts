@@ -33,19 +33,6 @@ export const getUserById = async (
   }
 };
 
-// export const getUserBooks = async (
-//   user_id: number
-// ): Promise<Book[] | null | undefined> => {
-//   try {
-//     const result = await query(`SELECT * FROM books WHERE user_id = $1`, [
-//       user_id,
-//     ]);
-
-//     return result.rows || null;
-//   } catch (error) {
-//     console.log("database error", error);
-//   }
-// };
 
 export const getUserBooks = async (user_id: number): Promise<Book[] | null | undefined> => {
   try {

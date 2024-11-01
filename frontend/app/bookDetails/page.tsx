@@ -2,16 +2,16 @@
 
 import React, { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { BookContext, SelectedBookContext } from "@/context/bookContext";
 import Navigation from "@/components/book/navigation";
 import {
-  ThumbsUp,
-  ThumbsDown,
   Book,
   Calendar,
   User,
   Building,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "@/hooks/use-toast";
@@ -29,9 +29,9 @@ export default function BookDetails() {
   if (!selectedBook) {
     return <div>No book selected</div>;
   }
-
   const handleLikeDislike = async (book_id: number, isLike: boolean) => {
     const token = localStorage.getItem("token");
+    
     if (!token) {
       toast({
         title: "Authentication Required",
@@ -40,32 +40,93 @@ export default function BookDetails() {
       });
       return;
     }
-
-    
-
+  
+    const currentUserLikeStatus = userLikes?.[book_id];
+    const oppositeAction = isLike ? false : true;
+  
     try {
+      if (currentUserLikeStatus === oppositeAction) {
+        await fetch(`http://localhost:4000/likeDislike`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            book_id,
+            liked: oppositeAction,
+          }),
+        });
+  
+        setBooks((prevBooks) => 
+          prevBooks.map((book) => 
+            book.book_id === book_id
+              ? {
+                  ...book,
+                  likes: oppositeAction
+                    ? Math.max((book.likes || 0) - 1, 0)
+                    : book.likes,
+                  dislikes: !oppositeAction
+                    ? Math.max((book.dislikes || 0) - 1, 0)
+                    : book.dislikes,
+                }
+              : book
+          )
+        );
+      }
+  
       const response = await fetch(`http://localhost:4000/likeDislike`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ book_id, liked: isLike }),
+        body: JSON.stringify({
+          book_id,
+          liked: isLike,
+        }),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
-        setSelectedBook((prev: any) => ({
+        setUserLikes((prev) => ({
           ...prev,
-          likes: isLike ? (prev?.likes || 0) + 1 : prev?.likes,
-          dislikes: !isLike ? (prev?.dislikes || 0) + 1 : prev?.dislikes,
+          [book_id]: result.message.includes("removed") ? null : isLike,
         }));
-
+  
+        setBooks((prevBooks) => {
+          const updatedBooks = prevBooks.map((book) =>
+            book.book_id === book_id
+              ? {
+                  ...book,
+                  likes: isLike
+                    ? result.message === "Book liked successfully"
+                      ? (book.likes || 0) + 1
+                      : result.message === "Like removed"
+                      ? Math.max((book.likes || 0) - 1, 0)
+                      : book.likes
+                    : book.likes,
+                  dislikes: !isLike
+                    ? result.message === "Book disliked successfully"
+                      ? (book.dislikes || 0) + 1
+                      : result.message === "Dislike removed"
+                      ? Math.max((book.dislikes || 0) - 1, 0)
+                      : book.dislikes
+                    : book.dislikes,
+                }
+              : book
+          );
+  
+          const updatedSelectedBook = updatedBooks.find((b) => b.book_id === book_id);
+          if (updatedSelectedBook) setSelectedBook(updatedSelectedBook);
+  
+          return updatedBooks;
+        });
+  
         toast({
           title: result.success ? "Success" : "Info",
           description: result.message,
-          variant: "default",
         });
       } else {
         toast({
@@ -81,8 +142,6 @@ export default function BookDetails() {
         description: "An unexpected error occurred",
         variant: "destructive",
       });
-    } finally {
-      
     }
   };
 
@@ -141,26 +200,36 @@ export default function BookDetails() {
                     </span>
                   </div>
                 </div>
-                {/* <div className="flex items-center space-x-6">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => handleLikeDislike(selectedBook.book_id, true)}
-                    className="flex items-center text-lg"
-                  >
-                    <ThumbsUp className="mr-3 h-6 w-6 text-green-500" />
-                    <span>{selectedBook.likes}</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => handleLikeDislike(selectedBook.book_id, false)}
-                    className="flex items-center text-lg"
-                  >
-                    <ThumbsDown className="mr-3 h-6 w-6 text-red-500" />
-                    <span>{selectedBook.dislikes}</span>
-                  </Button>
-                </div> */}
+                <div className="flex items-center space-x-6">
+                <CardFooter className="flex p-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLikeDislike(selectedBook.book_id, true);
+                      }}
+                    >
+                      <ThumbsUpIcon className="w-6 h-6 text-green-500" />
+                      <span className="sr-only">Like</span>
+                    </Button>
+                    <div className="text-gray-500">{selectedBook.likes}</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLikeDislike(selectedBook.book_id, false);
+                      }}
+                    >
+                      <ThumbsDownIcon className="w-6 h-6 text-red-500" />
+                      <span className="sr-only">Dislike</span>
+                    </Button>
+                    <div className="text-gray-500">{selectedBook.dislikes}</div>
+                  </div>
+                </CardFooter>
+                </div>
               </div>
             </div>
           </CardContent>
