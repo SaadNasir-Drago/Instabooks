@@ -1,4 +1,5 @@
 # Instabooks
+Deployed: https://instabooks-livid.vercel.app/
 A reimagining of the popular social media platform as an application for browsing books.
 A complete CRUD Single Page Application with HTML input validation using Next.js for frontend, Express.js for the backend along with TypeScript.
 Integrated JWT authentication for users and protected routes to prevent unauthenticated actions.
