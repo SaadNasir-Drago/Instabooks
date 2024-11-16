@@ -1,21 +1,24 @@
-"use client"
+"use client";
 import React, { useEffect, useState } from "react";
 import { Genre } from "../../../backend/src/types";
 import { useGenre } from "@/context/genreContext";
 
 function GenreList() {
-  const {selectedGenre, setSelectedGenre} = useGenre();
-  const [genres, setGenres] = useState<Genre[]>([{genre_id: 0, genre_name: "All"}]);
+  const { selectedGenre, setSelectedGenre } = useGenre();
+  const [genres, setGenres] = useState<Genre[]>([
+    { genre_id: 0, genre_name: "All" },
+  ]);
 
   useEffect(() => {
     async function fetchGenres() {
-      const response = await fetch(`https://instabooks.onrender.com/genres`);
-      
+      const response = await fetch(
+        `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/genres`
+      );
+
       if (response.ok) {
         const data = await response.json();
         // Set genres state to include the "All" genre along with fetched genres
         setGenres([{ genre_id: 0, genre_name: "All" }, ...data]);
-        
       } else {
         console.error("Failed to fetch genres");
       }

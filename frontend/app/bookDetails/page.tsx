@@ -45,17 +45,20 @@ export default function BookDetails() {
 
     try {
       if (currentUserLikeStatus === oppositeAction) {
-        await fetch(`https://instabooks.onrender.com/likeDislike`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            book_id,
-            liked: oppositeAction,
-          }),
-        });
+        await fetch(
+          `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/likeDislike`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              book_id,
+              liked: oppositeAction,
+            }),
+          }
+        );
 
         setBooks((prevBooks) =>
           prevBooks.map((book) =>
@@ -75,7 +78,7 @@ export default function BookDetails() {
       }
 
       const response = await fetch(
-        `https://instabooks.onrender.com/likeDislike`,
+        `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/likeDislike`,
         {
           method: "POST",
           headers: {
@@ -154,7 +157,7 @@ export default function BookDetails() {
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `https://instabooks.onrender.com/uploads/${cover_img}`;
+    return `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/uploads/${cover_img}`;
   };
 
   return (

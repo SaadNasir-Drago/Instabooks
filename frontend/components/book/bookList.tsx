@@ -90,7 +90,7 @@ export default function BookList() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `https://instabooks.onrender.com/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
+          `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/books?sort=${sort}&search=${search}&genre=${genre.genre_id}&page=${page}&limit=20`
         );
         const data = await response.json();
 
@@ -138,17 +138,20 @@ export default function BookList() {
 
     try {
       if (currentUserLikeStatus === oppositeAction) {
-        await fetch(`https://instabooks.onrender.com/likeDislike`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            book_id: book_id,
-            liked: oppositeAction,
-          }),
-        });
+        await fetch(
+          `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/likeDislike`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              book_id: book_id,
+              liked: oppositeAction,
+            }),
+          }
+        );
 
         setBooks((prevBooks) =>
           prevBooks.map((book) =>
@@ -168,7 +171,7 @@ export default function BookList() {
       }
 
       const response = await fetch(
-        `https://instabooks.onrender.com/likeDislike`,
+        `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/likeDislike`,
         {
           method: "POST",
           headers: {
@@ -251,7 +254,7 @@ export default function BookList() {
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `https://instabooks.onrender.com/uploads/${cover_img}`;
+    return `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/uploads/${cover_img}`;
   };
 
   return (

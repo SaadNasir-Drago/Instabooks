@@ -129,7 +129,7 @@ export default function UpdateBook() {
       }
 
       const response = await fetch(
-        `https://instabooks.onrender.com/updateBook/${bookData.book_id}`,
+        `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/updateBook/${bookData.book_id}`,
         {
           method: "PUT",
           headers: {
@@ -171,7 +171,7 @@ export default function UpdateBook() {
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `https://instabooks.onrender.com/uploads/${cover_img}`;
+    return `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/uploads/${cover_img}`;
   };
   const LoadingSpinner = () => (
     <div className="flex flex-col justify-center items-center h-64 space-y-4">

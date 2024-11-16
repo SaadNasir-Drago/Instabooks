@@ -110,13 +110,16 @@ export default function AddBook() {
       if (uploadedImage) {
         formData.append("cover_img", uploadedImage);
       }
-      const response = await fetch("https://instabooks.onrender.com/addbook", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        "https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/addbook",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         await response.json();

@@ -33,7 +33,7 @@ export default function CreateUser() {
 
     try {
       const response = await fetch(
-        "https://instabooks.onrender.com/createUser",
+        "https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/createUser",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

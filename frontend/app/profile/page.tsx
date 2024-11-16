@@ -71,7 +71,7 @@ export default function ProfilePage() {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        "https://instabooks.onrender.com/profileUser",
+        "https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/profileUser",
         {
           method: "GET",
           headers: {
@@ -97,7 +97,7 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `https://instabooks.onrender.com/profileBooks`,
+        `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/profileBooks`,
         {
           method: "GET",
           headers: {
@@ -150,7 +150,7 @@ export default function ProfilePage() {
     if (bookToDelete) {
       try {
         const response = await fetch(
-          `https://instabooks.onrender.com/book/${bookToDelete}`,
+          `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/book/${bookToDelete}`,
           {
             method: "DELETE",
           }
@@ -196,7 +196,7 @@ export default function ProfilePage() {
     if (cover_img.startsWith("http://") || cover_img.startsWith("https://")) {
       return cover_img;
     }
-    return `https://instabooks.onrender.com/uploads/${cover_img}`;
+    return `https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/uploads/${cover_img}`;
   };
 
   return (
