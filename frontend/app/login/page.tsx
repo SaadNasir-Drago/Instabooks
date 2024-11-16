@@ -19,7 +19,7 @@ export default function LoginPage() {
     setError(""); // Reset error state before the new attempt
 
     try {
-      const response = await fetch("https://disturbed-devan-saadnasir-602e9ad5.koyeb.app//user", {
+      const response = await fetch("https://disturbed-devan-saadnasir-602e9ad5.koyeb.app/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
