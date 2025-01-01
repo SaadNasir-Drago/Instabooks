@@ -42,25 +42,40 @@ export const getBooks = async (
 
     const result = await query(
       `
-      SELECT b.*, 
-             COALESCE(l.likes_count, 0)::integer AS likes, 
-             COALESCE(l.dislikes_count, 0)::integer AS dislikes 
-      FROM (
-          SELECT DISTINCT b.book_id
-          FROM books b
-          LEFT JOIN genre_books gb ON b.book_id = gb.book_id
-          WHERE b.title ILIKE $3 ${genreFilter}
-      ) AS unique_books
-      JOIN books b ON b.book_id = unique_books.book_id
-      LEFT JOIN (
-          SELECT book_id, 
-                 SUM(CASE WHEN liked = true THEN 1 ELSE 0 END) AS likes_count, 
-                 SUM(CASE WHEN liked = false THEN 1 ELSE 0 END) AS dislikes_count 
-          FROM likes 
-          GROUP BY book_id
-      ) l ON b.book_id = l.book_id
-      ${orderByClause}
-      LIMIT $1 OFFSET $2
+        SELECT 
+    b.*,
+    COALESCE(l.likes_count, 0)::integer AS likes,
+    COALESCE(l.dislikes_count, 0)::integer AS dislikes,
+    COALESCE(f.favorites_count, 0)::integer AS "favoritesCount"
+FROM (
+    SELECT DISTINCT b.book_id
+    FROM books b
+    LEFT JOIN genre_books gb ON b.book_id = gb.book_id
+    WHERE b.title ILIKE $3
+    ${genreFilter}  -- e.g. AND gb.genre_id = $someGenreId
+) AS unique_books
+JOIN books b 
+    ON b.book_id = unique_books.book_id
+LEFT JOIN (
+    SELECT 
+      book_id, 
+      SUM(CASE WHEN liked = true THEN 1 ELSE 0 END) AS likes_count,
+      SUM(CASE WHEN liked = false THEN 1 ELSE 0 END) AS dislikes_count
+    FROM likes
+    GROUP BY book_id
+) l 
+    ON b.book_id = l.book_id
+LEFT JOIN (
+    SELECT
+      book_id,
+      -- Count how many "favorited" = true
+      SUM(CASE WHEN favorited = true THEN 1 ELSE 0 END) AS favorites_count
+    FROM favorites
+    GROUP BY book_id
+) f
+    ON b.book_id = f.book_id
+${orderByClause}
+LIMIT $1 OFFSET $2
     `,
       queryParams
     );
