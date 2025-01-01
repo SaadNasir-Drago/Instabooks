@@ -11,6 +11,7 @@ router.post('/likeDislike', cookieJwtAuth, bookController.likeDislikeBook)
 router.get('/genres', bookController.getGenres)
 router.put('/updateBook/:id', uploadSingle, bookController.updateBook);
 router.delete('/book/:id', bookController.deleteBook);
+router.post('/favorite', cookieJwtAuth, bookController.favoriteBook);
 
 
 

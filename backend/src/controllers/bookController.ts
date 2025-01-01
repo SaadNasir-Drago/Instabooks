@@ -123,3 +123,27 @@ export const getGenres = async (req: Request, res: Response) => {
     res.status(500).send("Error fetching genres");
   }
 };
+
+export const favoriteBook = async (req: Request, res: Response) => {
+  try {
+    const result = await bookModel.favoriteBook(req.body);
+
+    if (result.success) {
+      res.status(200).json({ 
+        success: result.success, 
+        message: result.message 
+      });
+    } else {
+      res.status(200).json({ 
+        success: result.success, 
+        message: result.message 
+      });
+    }
+  } catch (error) {
+    console.error("Error in favoriteBook controller:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while processing your request"
+    });
+  }
+};

@@ -285,3 +285,59 @@ export const likeDislikeBook = async (
     throw error;
   }
 };
+
+export const favoriteBook = async (
+  favorite: { user_id: number; book_id: number; favorited: boolean }
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    // First, check the current state in the database
+    const currentState = await query(
+      `SELECT favorited FROM favorites WHERE user_id = $1 AND book_id = $2`,
+      [favorite.user_id, favorite.book_id]
+    );
+
+    let updateQuery: string;
+    let queryParams: any[]; // Parameters to be passed to the query
+    let updateMessage: string;
+
+    if (currentState.rows.length === 0) {
+      // No existing record, insert a new one
+      updateQuery = `INSERT INTO favorites (user_id, book_id, favorited) VALUES ($1, $2, $3)`;
+      queryParams = [favorite.user_id, favorite.book_id, favorite.favorited];
+      updateMessage = favorite.favorited ? "Book favorited successfully" : "Book unfavorited successfully";
+    } else {
+      const currentFavorited = currentState.rows[0].favorited;
+
+      if (favorite.favorited) {
+        // User is trying to favorite
+        if (currentFavorited === true) {
+          updateQuery = `UPDATE favorites SET favorited = NULL WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Favorite removed";
+          queryParams = [favorite.user_id, favorite.book_id]; // Only 2 parameters
+        } else {
+          updateQuery = `UPDATE favorites SET favorited = TRUE WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Book favorited successfully";
+          queryParams = [favorite.user_id, favorite.book_id]; // Only 2 parameters
+        }
+      } else {
+        // User is trying to unfavorite
+        if (currentFavorited === false) {
+          updateQuery = `UPDATE favorites SET favorited = NULL WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Unfavorite removed";
+          queryParams = [favorite.user_id, favorite.book_id]; // Only 2 parameters
+        } else {
+          updateQuery = `UPDATE favorites SET favorited = FALSE WHERE user_id = $1 AND book_id = $2`;
+          updateMessage = "Book unfavorited successfully";
+          queryParams = [favorite.user_id, favorite.book_id]; // Only 2 parameters
+        }
+      }
+    }
+
+    await query(updateQuery, queryParams);
+
+    return { success: true, message: updateMessage };
+  } catch (error) {
+    console.error("Error in favoriteBook:", error);
+    throw error;
+  }
+};
